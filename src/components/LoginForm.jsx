@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { loginAction } from "@/lib/auth";
+import { loginAction } from "@/lib/actions";
 
 const INITIAL_STATE = { error: null };
 

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { logoutAction } from "@/lib/auth";
+import { logoutAction } from "@/lib/actions";
 
 const NAV = [
   { href: "/", label: "Dashboard" },
