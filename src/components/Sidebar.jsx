@@ -8,6 +8,7 @@ import { logoutAction } from "@/lib/actions";
 const NAV = [
   { href: "/", label: "Dashboard" },
   { href: "/noticias", label: "Noticias" },
+  { href: "/imagenes", label: "Imágenes" },
 ];
 
 function NavLinks({ pathname, onNavigate }) {

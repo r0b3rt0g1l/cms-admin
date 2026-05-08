@@ -2,7 +2,15 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ApiError, loginRequest } from "./api";
+import {
+  ApiError,
+  loginRequest,
+  getImagenes,
+  createImagen,
+  updateImagen,
+  deleteImagen,
+  replaceImagen,
+} from "./api";
 
 const TOKEN_COOKIE = "token";
 const USER_COOKIE = "usuario";
@@ -55,4 +63,80 @@ export async function logoutAction() {
   store.delete(TOKEN_COOKIE);
   store.delete(USER_COOKIE);
   redirect("/login");
+}
+export async function listImagenesAction(galeria) {
+  try {
+    const data = await getImagenes(galeria);
+    return { data };
+  } catch (err) {
+    return { error: err?.message || "Error al cargar imágenes." };
+  }
+}
+
+export async function createImagenAction(prevState, formData) {
+  const archivo = formData.get("archivo");
+
+  if (!archivo || archivo.size === 0) {
+    return { error: "Selecciona un archivo para subir." };
+  }
+
+  try {
+    await createImagen(formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    if (err instanceof ApiError && err.status === 401) {
+      return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
+    }
+    return { error: err?.message || "Error al subir la imagen." };
+  }
+
+  redirect("/imagenes");
+}
+
+export async function updateImagenAction(id, data) {
+  try {
+    const updated = await updateImagen(id, data);
+    return { data: updated };
+  } catch (err) {
+    return { error: err?.message || "Error al actualizar." };
+  }
+}
+
+export async function deleteImagenAction(prevState, formData) {
+  const id = formData?.get("id");
+  if (!id) return { error: "Falta el identificador de la imagen." };
+
+  try {
+    await deleteImagen(id);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    if (err instanceof ApiError && err.status === 401) {
+      return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
+    }
+    return { error: err?.message || "Error al eliminar." };
+  }
+
+  redirect("/imagenes");
+}
+
+export async function replaceImagenAction(prevState, formData) {
+  const id = formData?.get("id");
+  if (!id) return { error: "Falta el identificador de la imagen." };
+
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) {
+    return { error: "Selecciona un archivo para reemplazar." };
+  }
+
+  try {
+    await replaceImagen(id, formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    if (err instanceof ApiError && err.status === 401) {
+      return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
+    }
+    return { error: err?.message || "Error al reemplazar la imagen." };
+  }
+
+  redirect("/imagenes");
 }

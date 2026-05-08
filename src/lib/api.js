@@ -99,3 +99,73 @@ export function deleteNoticia(id) {
     method: "DELETE",
   });
 }
+async function apiUpload(path, formData, method = "POST") {
+  const finalHeaders = {
+    Accept: "application/json",
+    ...(await authHeader()),
+  };
+
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers: finalHeaders,
+      body: formData,
+      cache: "no-store",
+    });
+  } catch {
+    throw new ApiError("No se pudo conectar con el servidor", 0);
+  }
+
+  if (response.status === 204) return null;
+
+  let data = null;
+  const text = await response.text();
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
+  }
+
+  if (!response.ok) {
+    const message =
+      (data && typeof data === "object" && (data.message || data.error)) ||
+      response.statusText ||
+      "Error de la API";
+    throw new ApiError(message, response.status);
+  }
+
+  return data;
+}
+
+export function getImagenes(galeria) {
+  const query = galeria ? `?galeria=${encodeURIComponent(galeria)}` : "";
+  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/imagenes${query}`);
+}
+
+export function createImagen(formData) {
+  return apiUpload(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/imagenes`, formData);
+}
+
+export function updateImagen(id, data) {
+  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/imagenes/${id}`, {
+    method: "PUT",
+    body: data,
+  });
+}
+
+export function deleteImagen(id) {
+  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/imagenes/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function replaceImagen(id, formData) {
+  return apiUpload(
+    `/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/imagenes/${id}/archivo`,
+    formData,
+    "PUT"
+  );
+}
