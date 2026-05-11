@@ -9,6 +9,7 @@ const NAV = [
   { href: "/", label: "Dashboard" },
   { href: "/noticias", label: "Noticias" },
   { href: "/imagenes", label: "Imágenes" },
+  { href: "/documentos", label: "Documentos" },
 ];
 
 function NavLinks({ pathname, onNavigate }) {

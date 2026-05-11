@@ -169,3 +169,21 @@ export function replaceImagen(id, formData) {
     "PUT"
   );
 }
+
+export function getDocumentos(filtros) {
+  const params = new URLSearchParams();
+  if (filtros?.categoria) params.set("categoria", filtros.categoria);
+  if (filtros?.anio) params.set("anio", filtros.anio);
+  const query = params.toString() ? `?${params.toString()}` : "";
+  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/documentos${query}`);
+}
+
+export function createDocumento(formData) {
+  return apiUpload(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/documentos`, formData);
+}
+
+export function deleteDocumento(id) {
+  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/documentos/${id}`, {
+    method: "DELETE",
+  });
+}

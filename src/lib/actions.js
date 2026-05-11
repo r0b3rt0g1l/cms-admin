@@ -10,6 +10,9 @@ import {
   updateImagen,
   deleteImagen,
   replaceImagen,
+  getDocumentos,
+  createDocumento,
+  deleteDocumento,
 } from "./api";
 
 const TOKEN_COOKIE = "token";
@@ -139,4 +142,54 @@ export async function replaceImagenAction(prevState, formData) {
   }
 
   redirect("/imagenes");
+}
+
+export async function listDocumentosAction(filtros) {
+  try {
+    const data = await getDocumentos(filtros);
+    return { data };
+  } catch (err) {
+    return { error: err?.message || "Error al cargar documentos." };
+  }
+}
+
+export async function createDocumentoAction(prevState, formData) {
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) {
+    return { error: "Selecciona un archivo para subir." };
+  }
+
+  const titulo = String(formData.get("titulo") || "").trim();
+  if (!titulo) {
+    return { error: "El título es obligatorio." };
+  }
+
+  try {
+    await createDocumento(formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    if (err instanceof ApiError && err.status === 401) {
+      return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
+    }
+    return { error: err?.message || "Error al subir el documento." };
+  }
+
+  redirect("/documentos");
+}
+
+export async function deleteDocumentoAction(prevState, formData) {
+  const id = formData?.get("id");
+  if (!id) return { error: "Falta el identificador del documento." };
+
+  try {
+    await deleteDocumento(id);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    if (err instanceof ApiError && err.status === 401) {
+      return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
+    }
+    return { error: err?.message || "Error al eliminar el documento." };
+  }
+
+  redirect("/documentos");
 }
