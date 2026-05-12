@@ -13,6 +13,11 @@ import {
   getDocumentos,
   createDocumento,
   deleteDocumento,
+  getHeroSlides,
+  createHeroSlide,
+  updateHeroSlide,
+  replaceHeroSlideImagen,
+  deleteHeroSlide,
 } from "./api";
 
 const TOKEN_COOKIE = "token";
@@ -192,4 +197,97 @@ export async function deleteDocumentoAction(prevState, formData) {
   }
 
   redirect("/documentos");
+}
+
+export async function listHeroSlidesAction() {
+  try {
+    const data = await getHeroSlides();
+    return { data };
+  } catch (err) {
+    return { error: err?.message || "Error al cargar slides." };
+  }
+}
+
+export async function createHeroSlideAction(prevState, formData) {
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) {
+    return { error: "Selecciona una imagen para el slide." };
+  }
+  const titulo = formData.get("titulo");
+  if (!titulo) {
+    return { error: "El título es requerido." };
+  }
+  try {
+    await createHeroSlide(formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    if (err instanceof ApiError && err.status === 401) {
+      return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
+    }
+    return { error: err?.message || "Error al crear el slide." };
+  }
+  redirect("/hero");
+}
+
+export async function updateHeroSlideAction(prevState, formData) {
+  const id = formData?.get("id");
+  if (!id) return { error: "Falta el identificador del slide." };
+
+  const data = {
+    etiqueta: formData.get("etiqueta") || null,
+    titulo: formData.get("titulo"),
+    subtitulo: formData.get("subtitulo") || null,
+    textoBoton: formData.get("textoBoton") || null,
+    linkBoton: formData.get("linkBoton") || null,
+    orden: parseInt(formData.get("orden") || "0", 10),
+    activo: formData.get("activo") === "on",
+  };
+
+  try {
+    await updateHeroSlide(id, data);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    if (err instanceof ApiError && err.status === 401) {
+      return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
+    }
+    return { error: err?.message || "Error al actualizar el slide." };
+  }
+  redirect("/hero");
+}
+
+export async function replaceHeroSlideImagenAction(prevState, formData) {
+  const id = formData?.get("id");
+  if (!id) return { error: "Falta el identificador del slide." };
+
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) {
+    return { error: "Selecciona una imagen para reemplazar." };
+  }
+
+  try {
+    await replaceHeroSlideImagen(id, formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    if (err instanceof ApiError && err.status === 401) {
+      return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
+    }
+    return { error: err?.message || "Error al reemplazar la imagen." };
+  }
+  redirect("/hero");
+}
+
+export async function deleteHeroSlideAction(prevState, formData) {
+  const id = formData?.get("id");
+  if (!id) return { error: "Falta el identificador del slide." };
+
+  try {
+    await deleteHeroSlide(id);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    if (err instanceof ApiError && err.status === 401) {
+      return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
+    }
+    return { error: err?.message || "Error al eliminar el slide." };
+  }
+  redirect("/hero");
 }

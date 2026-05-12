@@ -187,3 +187,32 @@ export function deleteDocumento(id) {
     method: "DELETE",
   });
 }
+
+export function getHeroSlides() {
+  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/hero`);
+}
+
+export function createHeroSlide(formData) {
+  return apiUpload(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/hero`, formData);
+}
+
+export function updateHeroSlide(id, data) {
+  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/hero/${id}`, {
+    method: "PUT",
+    body: data,
+  });
+}
+
+export function replaceHeroSlideImagen(id, formData) {
+  return apiUpload(
+    `/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/hero/${id}/archivo`,
+    formData,
+    "PUT"
+  );
+}
+
+export function deleteHeroSlide(id) {
+  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/hero/${id}`, {
+    method: "DELETE",
+  });
+}
