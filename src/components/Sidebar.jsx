@@ -10,6 +10,7 @@ const NAV = [
   { href: "/noticias", label: "Noticias" },
   { href: "/imagenes", label: "Imágenes" },
   { href: "/documentos", label: "Documentos" },
+  { href: "/sevac", label: "SEvAC" },
   { href: "/hero", label: "Hero / Banner" },
 ];
 

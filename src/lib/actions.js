@@ -18,6 +18,9 @@ import {
   updateHeroSlide,
   replaceHeroSlideImagen,
   deleteHeroSlide,
+  getSevac,
+  createSevac,
+  deleteSevac,
 } from "./api";
 
 const TOKEN_COOKIE = "token";
@@ -290,4 +293,49 @@ export async function deleteHeroSlideAction(prevState, formData) {
     return { error: err?.message || "Error al eliminar el slide." };
   }
   redirect("/hero");
+}
+
+export async function listSevacAction(filtros = {}) {
+  try {
+    const data = await getSevac(filtros);
+    return { data };
+  } catch (err) {
+    return { error: err?.message || "Error al cargar documentos SEvAC." };
+  }
+}
+
+export async function createSevacAction(prevState, formData) {
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) {
+    return { error: "Selecciona un archivo PDF." };
+  }
+  const titulo = formData.get("titulo");
+  if (!titulo) {
+    return { error: "El título es requerido." };
+  }
+  try {
+    await createSevac(formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    if (err instanceof ApiError && err.status === 401) {
+      return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
+    }
+    return { error: err?.message || "Error al subir el documento." };
+  }
+  redirect("/sevac");
+}
+
+export async function deleteSevacAction(prevState, formData) {
+  const id = formData?.get("id");
+  if (!id) return { error: "Falta el identificador del documento." };
+  try {
+    await deleteSevac(id);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    if (err instanceof ApiError && err.status === 401) {
+      return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
+    }
+    return { error: err?.message || "Error al eliminar el documento." };
+  }
+  redirect("/sevac");
 }

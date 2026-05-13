@@ -216,3 +216,22 @@ export function deleteHeroSlide(id) {
     method: "DELETE",
   });
 }
+
+export function getSevac(filtros = {}) {
+  const params = new URLSearchParams();
+  if (filtros.categoria) params.append("categoria", filtros.categoria);
+  if (filtros.anio) params.append("anio", filtros.anio);
+  const queryString = params.toString();
+  const suffix = queryString ? `?${queryString}` : "";
+  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/sevac${suffix}`);
+}
+
+export function createSevac(formData) {
+  return apiUpload(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/sevac`, formData);
+}
+
+export function deleteSevac(id) {
+  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/sevac/${id}`, {
+    method: "DELETE",
+  });
+}
