@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import {
   ApiError,
   loginRequest,
@@ -12,6 +13,7 @@ import {
   replaceImagen,
   getDocumentos,
   createDocumento,
+  updateDocumento,
   deleteDocumento,
   getHeroSlides,
   createHeroSlide,
@@ -20,6 +22,7 @@ import {
   deleteHeroSlide,
   getSevac,
   createSevac,
+  updateSevac,
   deleteSevac,
 } from "./api";
 
@@ -152,56 +155,6 @@ export async function replaceImagenAction(prevState, formData) {
   redirect("/imagenes");
 }
 
-export async function listDocumentosAction(filtros) {
-  try {
-    const data = await getDocumentos(filtros);
-    return { data };
-  } catch (err) {
-    return { error: err?.message || "Error al cargar documentos." };
-  }
-}
-
-export async function createDocumentoAction(prevState, formData) {
-  const archivo = formData.get("archivo");
-  if (!archivo || archivo.size === 0) {
-    return { error: "Selecciona un archivo para subir." };
-  }
-
-  const titulo = String(formData.get("titulo") || "").trim();
-  if (!titulo) {
-    return { error: "El título es obligatorio." };
-  }
-
-  try {
-    await createDocumento(formData);
-  } catch (err) {
-    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    if (err instanceof ApiError && err.status === 401) {
-      return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
-    }
-    return { error: err?.message || "Error al subir el documento." };
-  }
-
-  redirect("/documentos");
-}
-
-export async function deleteDocumentoAction(prevState, formData) {
-  const id = formData?.get("id");
-  if (!id) return { error: "Falta el identificador del documento." };
-
-  try {
-    await deleteDocumento(id);
-  } catch (err) {
-    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    if (err instanceof ApiError && err.status === 401) {
-      return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
-    }
-    return { error: err?.message || "Error al eliminar el documento." };
-  }
-
-  redirect("/documentos");
-}
-
 export async function listHeroSlidesAction() {
   try {
     const data = await getHeroSlides();
@@ -295,47 +248,155 @@ export async function deleteHeroSlideAction(prevState, formData) {
   redirect("/hero");
 }
 
-export async function listSevacAction(filtros = {}) {
-  try {
-    const data = await getSevac(filtros);
-    return { data };
-  } catch (err) {
-    return { error: err?.message || "Error al cargar documentos SEvAC." };
+// === Transparencia: server actions ===
+
+function describeError(err) {
+  if (err instanceof ApiError) {
+    if (err.status === 401) return "Tu sesión expiró. Vuelve a iniciar sesión.";
+    if (err.status === 0) return "No se pudo conectar con el servidor.";
+    return err.message;
   }
+  return err?.message || "Ocurrió un error al guardar.";
 }
 
-export async function createSevacAction(prevState, formData) {
+function applyPublicado(formData) {
+  formData.set("publicado", formData.get("publicado") ? "true" : "false");
+}
+
+function applyDocumentoCoercions(formData) {
+  const trimestre = formData.get("trimestre");
+  if (trimestre === null || trimestre === "") {
+    formData.delete("trimestre");
+  } else {
+    const n = parseInt(trimestre, 10);
+    if (Number.isFinite(n)) formData.set("trimestre", String(n));
+  }
+  const anio = formData.get("anio");
+  if (anio === null || anio === "") {
+    formData.delete("anio");
+  } else {
+    const n = parseInt(anio, 10);
+    if (Number.isFinite(n)) formData.set("anio", String(n));
+  }
+  const ambito = formData.get("ambito");
+  if (ambito === null || ambito === "") formData.delete("ambito");
+  applyPublicado(formData);
+}
+
+function applySevacCoercions(formData) {
+  if (formData.get("trimestre") === "") formData.delete("trimestre");
+  if (formData.get("anio") === "") formData.delete("anio");
+  applyPublicado(formData);
+}
+
+export async function createDocumentoTransparenciaAction(prevState, formData) {
+  const titulo = String(formData.get("titulo") || "").trim();
+  if (!titulo) return { error: "El título es obligatorio." };
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) return { error: "Selecciona un PDF para subir." };
+
+  applyDocumentoCoercions(formData);
+
+  try {
+    await createDocumento(formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/transparencia/lgc-g-ldf");
+  revalidatePath("/");
+  redirect("/transparencia/lgc-g-ldf?created=1");
+}
+
+export async function updateDocumentoTransparenciaAction(id, prevState, formData) {
+  if (!id) return { error: "Falta el identificador del documento." };
+  const titulo = String(formData.get("titulo") || "").trim();
+  if (!titulo) return { error: "El título es obligatorio." };
+
   const archivo = formData.get("archivo");
   if (!archivo || archivo.size === 0) {
-    return { error: "Selecciona un archivo PDF." };
+    formData.delete("archivo");
   }
-  const titulo = formData.get("titulo");
-  if (!titulo) {
-    return { error: "El título es requerido." };
+
+  applyDocumentoCoercions(formData);
+
+  try {
+    await updateDocumento(id, formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
   }
+  revalidatePath("/transparencia/lgc-g-ldf");
+  revalidatePath(`/transparencia/lgc-g-ldf/${id}/editar`);
+  redirect("/transparencia/lgc-g-ldf?updated=1");
+}
+
+export async function deleteDocumentoTransparenciaAction(formData) {
+  const id = String(formData?.get("id") || "");
+  if (!id) redirect("/transparencia/lgc-g-ldf?deleteError=missing-id");
+  try {
+    await deleteDocumento(id);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    redirect(`/transparencia/lgc-g-ldf?deleteError=${encodeURIComponent(describeError(err))}`);
+  }
+  revalidatePath("/transparencia/lgc-g-ldf");
+  revalidatePath("/");
+  redirect("/transparencia/lgc-g-ldf?deleted=1");
+}
+
+export async function createSevacTransparenciaAction(prevState, formData) {
+  const titulo = String(formData.get("titulo") || "").trim();
+  if (!titulo) return { error: "El título es obligatorio." };
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) return { error: "Selecciona un PDF para subir." };
+
+  applySevacCoercions(formData);
+
   try {
     await createSevac(formData);
   } catch (err) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    if (err instanceof ApiError && err.status === 401) {
-      return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
-    }
-    return { error: err?.message || "Error al subir el documento." };
+    return { error: describeError(err) };
   }
-  redirect("/sevac");
+  revalidatePath("/transparencia/sevac");
+  revalidatePath("/");
+  redirect("/transparencia/sevac?created=1");
 }
 
-export async function deleteSevacAction(prevState, formData) {
-  const id = formData?.get("id");
+export async function updateSevacTransparenciaAction(id, prevState, formData) {
   if (!id) return { error: "Falta el identificador del documento." };
+  const titulo = String(formData.get("titulo") || "").trim();
+  if (!titulo) return { error: "El título es obligatorio." };
+
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) {
+    formData.delete("archivo");
+  }
+
+  applySevacCoercions(formData);
+
+  try {
+    await updateSevac(id, formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/transparencia/sevac");
+  revalidatePath(`/transparencia/sevac/${id}/editar`);
+  redirect("/transparencia/sevac?updated=1");
+}
+
+export async function deleteSevacTransparenciaAction(formData) {
+  const id = String(formData?.get("id") || "");
+  if (!id) redirect("/transparencia/sevac?deleteError=missing-id");
   try {
     await deleteSevac(id);
   } catch (err) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    if (err instanceof ApiError && err.status === 401) {
-      return { error: "Tu sesión expiró. Vuelve a iniciar sesión." };
-    }
-    return { error: err?.message || "Error al eliminar el documento." };
+    redirect(`/transparencia/sevac?deleteError=${encodeURIComponent(describeError(err))}`);
   }
-  redirect("/sevac");
+  revalidatePath("/transparencia/sevac");
+  revalidatePath("/");
+  redirect("/transparencia/sevac?deleted=1");
 }

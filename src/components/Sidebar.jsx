@@ -9,27 +9,71 @@ const NAV = [
   { href: "/", label: "Dashboard" },
   { href: "/noticias", label: "Noticias" },
   { href: "/imagenes", label: "Imágenes" },
-  { href: "/documentos", label: "Documentos" },
-  { href: "/sevac", label: "SEvAC" },
+  {
+    label: "Transparencia",
+    basePath: "/transparencia",
+    children: [
+      { href: "/transparencia/lgc-g-ldf", label: "LGC.G / LDF" },
+      { href: "/transparencia/sevac", label: "SEvAC" },
+    ],
+  },
   { href: "/hero", label: "Hero / Banner" },
 ];
+
+const LINK_BASE =
+  "px-4 py-2 rounded-md text-sm font-medium transition-colors block";
+const LINK_ACTIVE = "bg-sidebar-hover text-white";
+const LINK_INACTIVE = "text-white/80 hover:bg-sidebar-hover hover:text-white";
+
+function isActive(pathname, href) {
+  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+}
 
 function NavLinks({ pathname, onNavigate }) {
   return (
     <nav className="flex flex-col gap-1">
       {NAV.map((item) => {
-        const active =
-          item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+        if (item.children) {
+          const groupOpen = pathname.startsWith(item.basePath);
+          return (
+            <details key={item.label} open={groupOpen} className="group">
+              <summary
+                className={`${LINK_BASE} ${
+                  groupOpen ? LINK_ACTIVE : LINK_INACTIVE
+                } cursor-pointer list-none flex items-center justify-between`}
+              >
+                <span>{item.label}</span>
+                <span className="text-xs transition-transform group-open:rotate-90">
+                  ▸
+                </span>
+              </summary>
+              <div className="mt-1 ml-3 flex flex-col gap-1 border-l border-white/10 pl-3">
+                {item.children.map((child) => {
+                  const active = isActive(pathname, child.href);
+                  return (
+                    <Link
+                      key={child.href}
+                      href={child.href}
+                      onClick={onNavigate}
+                      className={`${LINK_BASE} ${
+                        active ? LINK_ACTIVE : LINK_INACTIVE
+                      }`}
+                    >
+                      {child.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </details>
+          );
+        }
+        const active = isActive(pathname, item.href);
         return (
           <Link
             key={item.href}
             href={item.href}
             onClick={onNavigate}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              active
-                ? "bg-sidebar-hover text-white"
-                : "text-white/80 hover:bg-sidebar-hover hover:text-white"
-            }`}
+            className={`${LINK_BASE} ${active ? LINK_ACTIVE : LINK_INACTIVE}`}
           >
             {item.label}
           </Link>
