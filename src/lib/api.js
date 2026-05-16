@@ -174,6 +174,8 @@ export function getDocumentos(filtros) {
   const params = new URLSearchParams();
   if (filtros?.categoria) params.set("categoria", filtros.categoria);
   if (filtros?.anio) params.set("anio", filtros.anio);
+  if (filtros?.trimestre) params.set("trimestre", filtros.trimestre);
+  if (filtros?.ambito) params.set("ambito", filtros.ambito);
   const query = params.toString() ? `?${params.toString()}` : "";
   return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/documentos${query}`);
 }
@@ -221,6 +223,7 @@ export function getSevac(filtros = {}) {
   const params = new URLSearchParams();
   if (filtros.categoria) params.append("categoria", filtros.categoria);
   if (filtros.anio) params.append("anio", filtros.anio);
+  if (filtros.trimestre) params.append("trimestre", filtros.trimestre);
   const queryString = params.toString();
   const suffix = queryString ? `?${queryString}` : "";
   return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/sevac${suffix}`);
@@ -234,4 +237,40 @@ export function deleteSevac(id) {
   return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/sevac/${id}`, {
     method: "DELETE",
   });
+}
+
+// === Transparencia: LGC.G/LDF + SEvAC ===
+
+// TODO: cuando la API exponga GET /documentos/:id, reemplazar el filtrado por
+// una llamada directa por id.
+export async function getDocumento(id) {
+  const lista = await getDocumentos();
+  return Array.isArray(lista)
+    ? lista.find((d) => String(d.id) === String(id)) ?? null
+    : null;
+}
+
+export function updateDocumento(id, formData) {
+  return apiUpload(
+    `/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/documentos/${id}`,
+    formData,
+    "PATCH"
+  );
+}
+
+// TODO: cuando la API exponga GET /sevac/:id, reemplazar el filtrado por
+// una llamada directa por id.
+export async function getSevacItem(id) {
+  const lista = await getSevac();
+  return Array.isArray(lista)
+    ? lista.find((d) => String(d.id) === String(id)) ?? null
+    : null;
+}
+
+export function updateSevac(id, formData) {
+  return apiUpload(
+    `/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/sevac/${id}`,
+    formData,
+    "PATCH"
+  );
 }
