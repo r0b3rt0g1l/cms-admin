@@ -1,4 +1,4 @@
-import { ACTIVE_MUNICIPIO_SLUG, getNoticias } from "@/lib/api";
+import { getNoticias } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth";
 
 export const metadata = {
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard label="Total de noticias" value={total} accent="text-guinda" />
         <StatCard label="Publicadas" value={publicadas} accent="text-gold" />
-        <StatCard label="Municipio activo" value={ACTIVE_MUNICIPIO_SLUG} />
+        <StatCard label="Municipio activo" value={usuario?.municipioSlug ?? "—"} />
       </div>
     </div>
   );
