@@ -85,6 +85,23 @@ export default function NoticiaForm({ action, initialData = null, submitLabel = 
         />
       </div>
 
+      <div>
+        <label htmlFor="imagenUrl" className="block text-sm font-medium text-gray-700 mb-1">
+          URL de imagen (opcional)
+        </label>
+        <input
+          id="imagenUrl"
+          name="imagenUrl"
+          type="url"
+          defaultValue={initialData?.imagenUrl ?? ""}
+          placeholder="https://res.cloudinary.com/.../upload/..."
+          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-guinda focus:border-transparent"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Sube primero la foto en la sección <strong>Imágenes</strong> y pega aquí su URL.
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <label htmlFor="categoria" className="block text-sm font-medium text-gray-700 mb-1">
@@ -111,7 +128,7 @@ export default function NoticiaForm({ action, initialData = null, submitLabel = 
           <select
             id="estado"
             name="estado"
-            defaultValue={initialData?.estado ?? "borrador"}
+            defaultValue={initialData?.estado ?? "publicado"}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-guinda focus:border-transparent"
           >
             {ESTADOS.map((e) => (
@@ -120,6 +137,9 @@ export default function NoticiaForm({ action, initialData = null, submitLabel = 
               </option>
             ))}
           </select>
+          <p className="text-xs text-gray-500 mt-1">
+            Las noticias en <strong>borrador</strong> no se muestran en el sitio público.
+          </p>
         </div>
       </div>
 
