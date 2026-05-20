@@ -1,7 +1,5 @@
 import { cookies } from "next/headers";
 
-export const ACTIVE_MUNICIPIO_SLUG = "arivechi";
-
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
 export class ApiError extends Error {
@@ -15,6 +13,25 @@ async function authHeader() {
   const store = await cookies();
   const token = store.get("token")?.value;
   return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+// Resuelve el slug del municipio activo a partir de la cookie `usuario`.
+// Fallback: si la cookie es vieja (pre-deploy FASE A, sin municipioSlug)
+// o está corrupta, refresca el dato vía GET /api/auth/me.
+async function getMunicipioSlug() {
+  const store = await cookies();
+  const raw = store.get("usuario")?.value;
+  if (raw) {
+    try {
+      const usuario = JSON.parse(raw);
+      if (usuario.municipioSlug) return usuario.municipioSlug;
+    } catch {
+      // cae al fallback
+    }
+  }
+  const me = await apiFetch("/api/auth/me");
+  if (me?.municipioSlug) return me.municipioSlug;
+  throw new ApiError("Sesión incompleta — vuelve a iniciar sesión", 401);
 }
 
 export async function apiFetch(path, opts = {}) {
@@ -70,8 +87,9 @@ export function loginRequest({ email, password }) {
   });
 }
 
-export function getNoticias() {
-  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/noticias`);
+export async function getNoticias() {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/noticias`);
 }
 
 export async function getNoticia(id) {
@@ -80,22 +98,25 @@ export async function getNoticia(id) {
   return noticia ?? null;
 }
 
-export function createNoticia(data) {
-  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/noticias`, {
+export async function createNoticia(data) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/noticias`, {
     method: "POST",
     body: data,
   });
 }
 
-export function updateNoticia(id, data) {
-  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/noticias/${id}`, {
+export async function updateNoticia(id, data) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/noticias/${id}`, {
     method: "PUT",
     body: data,
   });
 }
 
-export function deleteNoticia(id) {
-  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/noticias/${id}`, {
+export async function deleteNoticia(id) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/noticias/${id}`, {
     method: "DELETE",
   });
 }
@@ -140,101 +161,117 @@ async function apiUpload(path, formData, method = "POST") {
   return data;
 }
 
-export function getImagenes(galeria) {
+export async function getImagenes(galeria) {
+  const slug = await getMunicipioSlug();
   const query = galeria ? `?galeria=${encodeURIComponent(galeria)}` : "";
-  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/imagenes${query}`);
+  return apiFetch(`/api/municipios/${slug}/imagenes${query}`);
 }
 
-export function createImagen(formData) {
-  return apiUpload(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/imagenes`, formData);
+export async function createImagen(formData) {
+  const slug = await getMunicipioSlug();
+  return apiUpload(`/api/municipios/${slug}/imagenes`, formData);
 }
 
-export function updateImagen(id, data) {
-  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/imagenes/${id}`, {
+export async function updateImagen(id, data) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/imagenes/${id}`, {
     method: "PUT",
     body: data,
   });
 }
 
-export function deleteImagen(id) {
-  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/imagenes/${id}`, {
+export async function deleteImagen(id) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/imagenes/${id}`, {
     method: "DELETE",
   });
 }
 
-export function replaceImagen(id, formData) {
+export async function replaceImagen(id, formData) {
+  const slug = await getMunicipioSlug();
   return apiUpload(
-    `/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/imagenes/${id}/archivo`,
+    `/api/municipios/${slug}/imagenes/${id}/archivo`,
     formData,
     "PUT"
   );
 }
 
-export function getDocumentos(filtros) {
+export async function getDocumentos(filtros) {
+  const slug = await getMunicipioSlug();
   const params = new URLSearchParams();
   if (filtros?.categoria) params.set("categoria", filtros.categoria);
   if (filtros?.anio) params.set("anio", filtros.anio);
   if (filtros?.trimestre) params.set("trimestre", filtros.trimestre);
   if (filtros?.ambito) params.set("ambito", filtros.ambito);
   const query = params.toString() ? `?${params.toString()}` : "";
-  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/documentos${query}`);
+  return apiFetch(`/api/municipios/${slug}/documentos${query}`);
 }
 
-export function createDocumento(formData) {
-  return apiUpload(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/documentos`, formData);
+export async function createDocumento(formData) {
+  const slug = await getMunicipioSlug();
+  return apiUpload(`/api/municipios/${slug}/documentos`, formData);
 }
 
-export function deleteDocumento(id) {
-  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/documentos/${id}`, {
+export async function deleteDocumento(id) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/documentos/${id}`, {
     method: "DELETE",
   });
 }
 
-export function getHeroSlides() {
-  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/hero`);
+export async function getHeroSlides() {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/hero`);
 }
 
-export function createHeroSlide(formData) {
-  return apiUpload(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/hero`, formData);
+export async function createHeroSlide(formData) {
+  const slug = await getMunicipioSlug();
+  return apiUpload(`/api/municipios/${slug}/hero`, formData);
 }
 
-export function updateHeroSlide(id, data) {
-  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/hero/${id}`, {
+export async function updateHeroSlide(id, data) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/hero/${id}`, {
     method: "PUT",
     body: data,
   });
 }
 
-export function replaceHeroSlideImagen(id, formData) {
+export async function replaceHeroSlideImagen(id, formData) {
+  const slug = await getMunicipioSlug();
   return apiUpload(
-    `/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/hero/${id}/archivo`,
+    `/api/municipios/${slug}/hero/${id}/archivo`,
     formData,
     "PUT"
   );
 }
 
-export function deleteHeroSlide(id) {
-  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/hero/${id}`, {
+export async function deleteHeroSlide(id) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/hero/${id}`, {
     method: "DELETE",
   });
 }
 
-export function getSevac(filtros = {}) {
+export async function getSevac(filtros = {}) {
+  const slug = await getMunicipioSlug();
   const params = new URLSearchParams();
   if (filtros.categoria) params.append("categoria", filtros.categoria);
   if (filtros.anio) params.append("anio", filtros.anio);
   if (filtros.trimestre) params.append("trimestre", filtros.trimestre);
   const queryString = params.toString();
   const suffix = queryString ? `?${queryString}` : "";
-  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/sevac${suffix}`);
+  return apiFetch(`/api/municipios/${slug}/sevac${suffix}`);
 }
 
-export function createSevac(formData) {
-  return apiUpload(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/sevac`, formData);
+export async function createSevac(formData) {
+  const slug = await getMunicipioSlug();
+  return apiUpload(`/api/municipios/${slug}/sevac`, formData);
 }
 
-export function deleteSevac(id) {
-  return apiFetch(`/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/sevac/${id}`, {
+export async function deleteSevac(id) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/sevac/${id}`, {
     method: "DELETE",
   });
 }
@@ -250,9 +287,10 @@ export async function getDocumento(id) {
     : null;
 }
 
-export function updateDocumento(id, formData) {
+export async function updateDocumento(id, formData) {
+  const slug = await getMunicipioSlug();
   return apiUpload(
-    `/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/documentos/${id}`,
+    `/api/municipios/${slug}/documentos/${id}`,
     formData,
     "PATCH"
   );
@@ -267,9 +305,10 @@ export async function getSevacItem(id) {
     : null;
 }
 
-export function updateSevac(id, formData) {
+export async function updateSevac(id, formData) {
+  const slug = await getMunicipioSlug();
   return apiUpload(
-    `/api/municipios/${ACTIVE_MUNICIPIO_SLUG}/sevac/${id}`,
+    `/api/municipios/${slug}/sevac/${id}`,
     formData,
     "PATCH"
   );
