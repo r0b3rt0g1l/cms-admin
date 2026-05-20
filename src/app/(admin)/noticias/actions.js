@@ -10,7 +10,8 @@ function readPayload(formData) {
     extracto: String(formData.get("extracto") || "").trim(),
     contenido: String(formData.get("contenido") || "").trim(),
     categoria: String(formData.get("categoria") || "general"),
-    estado: String(formData.get("estado") || "borrador"),
+    estado: String(formData.get("estado") || "publicado"),
+    imagenUrl: String(formData.get("imagenUrl") || "").trim() || null,
   };
 }
 

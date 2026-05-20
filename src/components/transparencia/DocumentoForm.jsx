@@ -117,21 +117,27 @@ export default function DocumentoForm({
 
       <div>
         <label htmlFor="ambito" className={LABEL_CLASS}>
-          Ámbito
+          Ámbito <span className="text-red-600">*</span>
         </label>
         <select
           id="ambito"
           name="ambito"
+          required
           defaultValue={initialData?.ambito ?? ""}
           className={`${INPUT_CLASS} bg-white`}
         >
-          <option value="">— (sin definir)</option>
+          <option value="" disabled>
+            Selecciona un ámbito…
+          </option>
           {AMBITOS.map((a) => (
             <option key={a.value} value={a.value}>
               {a.label}
             </option>
           ))}
         </select>
+        <p className="text-xs text-gray-500 mt-1">
+          El sitio público filtra por ámbito: documentos sin ámbito no se muestran.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
