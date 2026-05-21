@@ -5,7 +5,6 @@ import { useActionState, useState } from "react";
 import { createImagenAction } from "@/lib/actions";
 
 const GALERIAS = [
-  { value: "hero", label: "Hero (banner principal)" },
   { value: "galeria", label: "Galería del municipio" },
   { value: "eventos", label: "Eventos" },
   { value: "funcionarios", label: "Funcionarios" },
@@ -44,7 +43,9 @@ export default function NuevaImagenPage() {
         </Link>
         <h1 className="text-3xl font-bold mt-2">Subir imagen</h1>
         <p className="text-gray-600 mt-1">
-          Selecciona un archivo (máx. 10 MB) y elige la sección donde aparecerá.
+          Estas imágenes aparecen en la <strong>Galería</strong> del sitio
+          público. Para el banner principal del home, usa la sección{" "}
+          <strong>Hero / Banner</strong> (no esta).
         </p>
       </div>
 

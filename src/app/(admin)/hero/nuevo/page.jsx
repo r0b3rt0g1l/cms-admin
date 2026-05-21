@@ -35,7 +35,9 @@ export default function NuevoHeroSlidePage() {
         </Link>
         <h1 className="text-3xl font-bold mt-2">Nuevo slide</h1>
         <p className="text-gray-600 mt-1">
-          Sube una imagen y completa los textos del slide.
+          Estas imágenes aparecen en el <strong>banner principal del
+          inicio</strong> del sitio. Sube una imagen y completa los textos
+          del slide.
         </p>
       </div>
 
