@@ -24,6 +24,12 @@ import {
   createSevac,
   updateSevac,
   deleteSevac,
+  getFuncionarios,
+  getFuncionario,
+  createFuncionario,
+  updateFuncionario,
+  replaceFuncionarioFoto,
+  deleteFuncionario,
 } from "./api";
 
 const TOKEN_COOKIE = "token";
@@ -399,4 +405,125 @@ export async function deleteSevacTransparenciaAction(formData) {
   revalidatePath("/transparencia/sevac");
   revalidatePath("/");
   redirect("/transparencia/sevac?deleted=1");
+}
+
+// === Cabildo: server actions ===
+
+const TIPOS_CABILDO_VALIDOS = ["PRESIDENTE", "SINDICA", "REGIDOR", "DIF"];
+
+export async function listFuncionariosAction() {
+  try {
+    const data = await getFuncionarios();
+    return { data };
+  } catch (err) {
+    return { error: describeError(err) };
+  }
+}
+
+export async function getFuncionarioAction(id) {
+  try {
+    const data = await getFuncionario(id);
+    return { data };
+  } catch (err) {
+    return { error: describeError(err) };
+  }
+}
+
+export async function createFuncionarioAction(prevState, formData) {
+  const nombre = String(formData.get("nombre") || "").trim();
+  const cargo = String(formData.get("cargo") || "").trim();
+  const tipo = String(formData.get("tipo") || "").trim();
+  if (!nombre || !cargo) return { error: "Nombre y cargo son obligatorios." };
+  if (tipo && !TIPOS_CABILDO_VALIDOS.includes(tipo)) {
+    return { error: "Tipo de miembro inválido." };
+  }
+
+  // Foto es opcional al crear. Si no se subió archivo, lo quitamos del FormData
+  // para que multer no reciba un campo vacío.
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) {
+    formData.delete("archivo");
+  }
+
+  // Coerciones de checkbox y vacíos.
+  formData.set("activo", formData.get("activo") === "on" ? "true" : "false");
+
+  try {
+    await createFuncionario(formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/cabildo");
+  redirect("/cabildo?created=1");
+}
+
+export async function updateFuncionarioAction(prevState, formData) {
+  const id = formData?.get("id");
+  if (!id) return { error: "Falta el identificador del miembro." };
+
+  const nombre = String(formData.get("nombre") || "").trim();
+  const cargo = String(formData.get("cargo") || "").trim();
+  const tipoRaw = String(formData.get("tipo") || "").trim();
+  if (!nombre || !cargo) return { error: "Nombre y cargo son obligatorios." };
+  if (tipoRaw && !TIPOS_CABILDO_VALIDOS.includes(tipoRaw)) {
+    return { error: "Tipo de miembro inválido." };
+  }
+
+  const data = {
+    nombre,
+    cargo,
+    tipo: tipoRaw || null,
+    area: formData.get("area") || null,
+    email: formData.get("email") || null,
+    telefono: formData.get("telefono") || null,
+    bio: formData.get("bio") || null,
+    administracion: formData.get("administracion") || null,
+    orden: parseInt(formData.get("orden") || "0", 10),
+    activo: formData.get("activo") === "on",
+  };
+
+  try {
+    await updateFuncionario(id, data);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/cabildo");
+  revalidatePath(`/cabildo/${id}`);
+  redirect(`/cabildo/${id}?updated=1`);
+}
+
+export async function replaceFuncionarioFotoAction(prevState, formData) {
+  const id = formData?.get("id");
+  if (!id) return { error: "Falta el identificador del miembro." };
+
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) {
+    return { error: "Selecciona una imagen para reemplazar." };
+  }
+
+  try {
+    await replaceFuncionarioFoto(id, formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/cabildo");
+  revalidatePath(`/cabildo/${id}`);
+  redirect(`/cabildo/${id}?fotoUpdated=1`);
+}
+
+export async function deleteFuncionarioAction(prevState, formData) {
+  const id = formData?.get("id");
+  if (!id) return { error: "Falta el identificador del miembro." };
+
+  try {
+    await deleteFuncionario(id);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/cabildo");
+  redirect("/cabildo?deleted=1");
 }

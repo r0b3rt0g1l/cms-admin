@@ -18,6 +18,7 @@ const NAV = [
     ],
   },
   { href: "/hero", label: "Hero / Banner" },
+  { href: "/cabildo", label: "Directorio del Cabildo" },
 ];
 
 const LINK_BASE =

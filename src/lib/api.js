@@ -313,3 +313,48 @@ export async function updateSevac(id, formData) {
     "PATCH"
   );
 }
+
+// === Cabildo: Funcionarios (PR2) ===
+
+export async function getFuncionarios(filtros = {}) {
+  const slug = await getMunicipioSlug();
+  const params = new URLSearchParams();
+  if (filtros.tipo) params.set("tipo", filtros.tipo);
+  if (filtros.activo !== undefined) params.set("activo", String(filtros.activo));
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  return apiFetch(`/api/municipios/${slug}/funcionarios${qs}`);
+}
+
+export async function getFuncionario(id) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/funcionarios/${id}`);
+}
+
+export async function createFuncionario(formData) {
+  const slug = await getMunicipioSlug();
+  return apiUpload(`/api/municipios/${slug}/funcionarios`, formData);
+}
+
+export async function updateFuncionario(id, data) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/funcionarios/${id}`, {
+    method: "PUT",
+    body: data,
+  });
+}
+
+export async function replaceFuncionarioFoto(id, formData) {
+  const slug = await getMunicipioSlug();
+  return apiUpload(
+    `/api/municipios/${slug}/funcionarios/${id}/foto`,
+    formData,
+    "PUT"
+  );
+}
+
+export async function deleteFuncionario(id) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/funcionarios/${id}`, {
+    method: "DELETE",
+  });
+}
