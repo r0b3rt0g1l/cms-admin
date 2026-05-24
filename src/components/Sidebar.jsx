@@ -5,20 +5,33 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { logoutAction } from "@/lib/actions";
 
+// El menú espeja la organización del sitio público para que el
+// funcionario reconozca de inmediato dónde aparece lo que edita.
+// Los grupos plegables se abren automáticamente cuando estás en alguna
+// de sus sub-rutas (ver groupOpen abajo).
 const NAV = [
-  { href: "/", label: "Dashboard" },
-  { href: "/noticias", label: "Noticias" },
-  { href: "/imagenes", label: "Imágenes" },
+  { href: "/", label: "Inicio" },
+  {
+    label: "Gobierno",
+    children: [
+      { href: "/cabildo", label: "Cabildo Municipal" },
+    ],
+  },
+  {
+    label: "Acciones de Gobierno",
+    children: [
+      { href: "/noticias", label: "Noticias" },
+      { href: "/hero", label: "Carrusel de Inicio" },
+    ],
+  },
+  { href: "/imagenes", label: "Galería" },
   {
     label: "Transparencia",
-    basePath: "/transparencia",
     children: [
       { href: "/transparencia/lgc-g-ldf", label: "LGC.G / LDF" },
       { href: "/transparencia/sevac", label: "SEvAC" },
     ],
   },
-  { href: "/hero", label: "Hero / Banner" },
-  { href: "/cabildo", label: "Directorio del Cabildo" },
 ];
 
 const LINK_BASE =
@@ -35,7 +48,12 @@ function NavLinks({ pathname, onNavigate }) {
     <nav className="flex flex-col gap-1">
       {NAV.map((item) => {
         if (item.children) {
-          const groupOpen = pathname.startsWith(item.basePath);
+          // El grupo se abre si la ruta actual coincide con alguno de sus hijos.
+          // Esto soporta grupos que agrupan rutas no contiguas (ej. "Acciones
+          // de Gobierno" agrupa /noticias y /hero, que no comparten prefijo).
+          const groupOpen = item.children.some((c) =>
+            isActive(pathname, c.href),
+          );
           return (
             <details key={item.label} open={groupOpen} className="group">
               <summary

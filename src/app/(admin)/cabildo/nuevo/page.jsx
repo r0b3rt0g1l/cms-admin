@@ -31,10 +31,10 @@ export default function NuevoMiembroCabildoPage() {
         <Link href="/cabildo" className="text-sm text-gray-500 hover:text-gray-800">
           ← Volver al directorio
         </Link>
-        <h1 className="text-3xl font-bold mt-2">Nuevo miembro del cabildo</h1>
+        <h1 className="text-3xl font-bold mt-2">Nueva persona del cabildo</h1>
         <p className="text-gray-600 mt-1">
-          Agrega un integrante del cabildo (presidente, síndico/a, regidor/a o
-          DIF). La foto es opcional y se puede subir o reemplazar después.
+          Agrega a una persona del cabildo (presidente, síndico/a, regidor/a o
+          presidencia del DIF). La foto es opcional y la puedes subir después.
         </p>
       </div>
 
@@ -49,7 +49,7 @@ export default function NuevoMiembroCabildoPage() {
         className="bg-white rounded-lg border border-gray-200 p-6 space-y-5"
       >
         <div>
-          <label className="block text-sm font-medium mb-2">Tipo de miembro *</label>
+          <label className="block text-sm font-medium mb-2">Tipo de persona *</label>
           <select
             name="tipo"
             required
@@ -65,6 +65,10 @@ export default function NuevoMiembroCabildoPage() {
               </option>
             ))}
           </select>
+          <p className="text-xs text-gray-500 mt-1">
+            ¿Es presidente, síndico/a, regidor/a o presidencia del DIF? Esto
+            decide en qué grupo aparece en el sitio.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -90,6 +94,10 @@ export default function NuevoMiembroCabildoPage() {
               placeholder="Ej. Presidente Municipal"
               className="w-full border border-gray-300 rounded-md px-3 py-2"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Ej. <em>Presidente Municipal</em>, <em>Síndico Municipal</em>,{" "}
+              <em>Regidor/a de Obras</em>.
+            </p>
           </div>
         </div>
 
@@ -111,7 +119,8 @@ export default function NuevoMiembroCabildoPage() {
             </div>
           )}
           <p className="text-xs text-gray-500 mt-1">
-            Si no la subes ahora, podrás agregarla más tarde editando el miembro.
+            Recomendado: foto cuadrada de buena calidad, mínimo 400×400 px.
+            Si no la subes ahora, podrás agregarla después editando la persona.
           </p>
         </div>
 
@@ -187,13 +196,17 @@ export default function NuevoMiembroCabildoPage() {
               className="w-full border border-gray-300 rounded-md px-3 py-2"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Menor = aparece primero dentro de su grupo.
+              El número menor aparece primero dentro de su grupo. Ej. presidente
+              con <em>1</em>, regidor/a 1 con <em>10</em>, regidor/a 2 con{" "}
+              <em>11</em>.
             </p>
           </div>
 
           <label className="flex items-center gap-2 pb-2">
             <input type="checkbox" name="activo" defaultChecked className="h-4 w-4" />
-            <span className="text-sm">Miembro activo (visible en el portal)</span>
+            <span className="text-sm">
+              Visible en el sitio público
+            </span>
           </label>
         </div>
 
@@ -210,7 +223,7 @@ export default function NuevoMiembroCabildoPage() {
             style={{ backgroundColor: "#7d1d3f", color: "white" }}
             className="px-4 py-2 rounded-md hover:opacity-90 disabled:opacity-60"
           >
-            {pending ? "Creando..." : "Crear miembro"}
+            {pending ? "Guardando..." : "Guardar persona"}
           </button>
         </div>
       </form>
