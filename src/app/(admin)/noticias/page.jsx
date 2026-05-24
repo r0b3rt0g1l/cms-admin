@@ -61,7 +61,8 @@ export default async function NoticiasPage({ searchParams }) {
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Noticias</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Administra el contenido publicado en el portal.
+            Notas y avisos del Ayuntamiento. Aparecen en la sección{" "}
+            <strong>Acciones de Gobierno</strong> del sitio público.
           </p>
         </div>
         <Link

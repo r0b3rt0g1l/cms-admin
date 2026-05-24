@@ -11,9 +11,10 @@ export default async function HeroPage() {
     <div className="p-8">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Hero / Banner</h1>
+          <h1 className="text-3xl font-bold">Carrusel de Inicio</h1>
           <p className="text-gray-600 mt-1">
-            Administra los slides del carrusel principal del portal.
+            Imágenes grandes que rotan en la <strong>página principal</strong>{" "}
+            del sitio. Cada imagen puede tener un título y un botón.
           </p>
         </div>
         <Link
@@ -21,7 +22,7 @@ export default async function HeroPage() {
           style={{ backgroundColor: "#7d1d3f", color: "white" }}
           className="px-4 py-2 rounded-md hover:opacity-90 transition"
         >
-          + Nuevo slide
+          + Nueva imagen
         </Link>
       </div>
 

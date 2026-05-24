@@ -4,9 +4,9 @@ import { TIPOS_CABILDO, TIPO_LABEL } from "@/lib/cabildo-constants";
 import DeleteFuncionarioButton from "./[id]/DeleteFuncionarioButton";
 
 const FLASH = {
-  created: "Miembro del cabildo creado correctamente.",
-  updated: "Miembro del cabildo actualizado.",
-  deleted: "Miembro del cabildo eliminado.",
+  created: "✓ Persona guardada. Ya aparece en el sitio.",
+  updated: "✓ Datos actualizados.",
+  deleted: "✓ Persona eliminada del directorio.",
 };
 
 function avatarFallback(nombre) {
@@ -38,12 +38,12 @@ export default async function CabildoPage({ searchParams }) {
 
   return (
     <div className="p-8">
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex items-start justify-between mb-4">
         <div>
-          <h1 className="text-3xl font-bold">Directorio del Cabildo</h1>
+          <h1 className="text-3xl font-bold">Cabildo Municipal</h1>
           <p className="text-gray-600 mt-1">
-            Administra los miembros del cabildo que aparecen en el portal:
-            presidencia, sindicatura, regidurías y DIF.
+            Personas que integran el cabildo: presidencia, sindicatura,
+            regidurías y presidencia del DIF.
           </p>
         </div>
         <Link
@@ -51,12 +51,23 @@ export default async function CabildoPage({ searchParams }) {
           style={{ backgroundColor: "#7d1d3f", color: "white" }}
           className="px-4 py-2 rounded-md hover:opacity-90 transition"
         >
-          + Nuevo miembro
+          + Nueva persona
         </Link>
       </div>
 
+      <div className="bg-blue-50 border border-blue-200 text-blue-900 rounded-md px-4 py-3 mb-6 flex items-start gap-3">
+        <span aria-hidden="true" className="text-lg leading-none mt-0.5">ℹ️</span>
+        <p className="text-sm leading-relaxed">
+          <strong>Las personas que registres aquí aparecen automáticamente en
+          3 lugares del sitio:</strong>{" "}
+          la página de <em>Gobierno</em>, el{" "}
+          <em>Directorio del Cabildo</em> y la{" "}
+          <em>Estructura Orgánica</em>. Edita aquí una sola vez.
+        </p>
+      </div>
+
       {flashMessage && (
-        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-md mb-4">
+        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-md mb-4 font-medium">
           {flashMessage}
         </div>
       )}
@@ -69,19 +80,36 @@ export default async function CabildoPage({ searchParams }) {
 
       {miembros.length === 0 && !error ? (
         <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-          <p className="text-gray-500">
-            Aún no hay miembros del cabildo. Crea el primero para empezar.
+          <p className="text-gray-700 font-medium">
+            Aún no hay personas registradas en el cabildo.
+          </p>
+          <p className="text-sm text-gray-500 mt-1">
+            Agrega a la primera para que aparezca en el sitio.
           </p>
           <Link
             href="/cabildo/nuevo"
             style={{ backgroundColor: "#7d1d3f", color: "white" }}
             className="inline-block mt-4 px-4 py-2 rounded-md hover:opacity-90 transition"
           >
-            + Nuevo miembro
+            + Nueva persona
           </Link>
         </div>
       ) : (
         <div className="space-y-8">
+          {sinTipo.length > 0 && (
+            <div className="bg-yellow-50 border border-yellow-300 text-yellow-900 rounded-md px-4 py-3 flex items-start gap-3">
+              <span aria-hidden="true" className="text-lg leading-none mt-0.5">⚠️</span>
+              <p className="text-sm leading-relaxed">
+                <strong>
+                  Hay {sinTipo.length}{" "}
+                  {sinTipo.length === 1 ? "persona" : "personas"} sin tipo asignado.
+                </strong>{" "}
+                No aparecen agrupadas en la página de Gobierno del sitio.
+                Edita cada una y asígnale un tipo (Presidente, Síndico/a,
+                Regidor/a o DIF) para que se muestren correctamente.
+              </p>
+            </div>
+          )}
           {grupos.map((grupo) => {
             if (grupo.items.length === 0) return null;
             return (
@@ -153,7 +181,10 @@ export default async function CabildoPage({ searchParams }) {
                           >
                             Editar
                           </Link>
-                          <DeleteFuncionarioButton id={m.id} nombre={m.nombre} />
+                          <DeleteFuncionarioButton
+                            id={m.id}
+                            nombre={m.nombre}
+                          />
                         </div>
                       </div>
                     </div>

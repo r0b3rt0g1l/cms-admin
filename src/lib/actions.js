@@ -433,9 +433,11 @@ export async function createFuncionarioAction(prevState, formData) {
   const nombre = String(formData.get("nombre") || "").trim();
   const cargo = String(formData.get("cargo") || "").trim();
   const tipo = String(formData.get("tipo") || "").trim();
-  if (!nombre || !cargo) return { error: "Nombre y cargo son obligatorios." };
-  if (tipo && !TIPOS_CABILDO_VALIDOS.includes(tipo)) {
-    return { error: "Tipo de miembro inválido." };
+  if (!nombre) return { error: "Falta el nombre de la persona." };
+  if (!cargo) return { error: "Falta el cargo. Ej: Presidente Municipal, Síndico Municipal, Regidor/a." };
+  if (!tipo) return { error: "Selecciona el tipo de persona (Presidente, Síndico/a, Regidor/a o DIF)." };
+  if (!TIPOS_CABILDO_VALIDOS.includes(tipo)) {
+    return { error: "Tipo de persona inválido." };
   }
 
   // Foto es opcional al crear. Si no se subió archivo, lo quitamos del FormData
@@ -460,14 +462,16 @@ export async function createFuncionarioAction(prevState, formData) {
 
 export async function updateFuncionarioAction(prevState, formData) {
   const id = formData?.get("id");
-  if (!id) return { error: "Falta el identificador del miembro." };
+  if (!id) return { error: "Falta el identificador de la persona." };
 
   const nombre = String(formData.get("nombre") || "").trim();
   const cargo = String(formData.get("cargo") || "").trim();
   const tipoRaw = String(formData.get("tipo") || "").trim();
-  if (!nombre || !cargo) return { error: "Nombre y cargo son obligatorios." };
-  if (tipoRaw && !TIPOS_CABILDO_VALIDOS.includes(tipoRaw)) {
-    return { error: "Tipo de miembro inválido." };
+  if (!nombre) return { error: "Falta el nombre de la persona." };
+  if (!cargo) return { error: "Falta el cargo. Ej: Presidente Municipal, Síndico Municipal, Regidor/a." };
+  if (!tipoRaw) return { error: "Selecciona el tipo de persona (Presidente, Síndico/a, Regidor/a o DIF)." };
+  if (!TIPOS_CABILDO_VALIDOS.includes(tipoRaw)) {
+    return { error: "Tipo de persona inválido." };
   }
 
   const data = {
@@ -496,11 +500,11 @@ export async function updateFuncionarioAction(prevState, formData) {
 
 export async function replaceFuncionarioFotoAction(prevState, formData) {
   const id = formData?.get("id");
-  if (!id) return { error: "Falta el identificador del miembro." };
+  if (!id) return { error: "Falta el identificador de la persona." };
 
   const archivo = formData.get("archivo");
   if (!archivo || archivo.size === 0) {
-    return { error: "Selecciona una imagen para reemplazar." };
+    return { error: "Selecciona una imagen antes de subirla." };
   }
 
   try {
@@ -516,7 +520,7 @@ export async function replaceFuncionarioFotoAction(prevState, formData) {
 
 export async function deleteFuncionarioAction(prevState, formData) {
   const id = formData?.get("id");
-  if (!id) return { error: "Falta el identificador del miembro." };
+  if (!id) return { error: "Falta el identificador de la persona." };
 
   try {
     await deleteFuncionario(id);

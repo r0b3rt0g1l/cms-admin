@@ -73,7 +73,9 @@ export default async function LgcGLdfPage({ searchParams }) {
           </p>
           <h1 className="text-2xl font-semibold text-gray-900 mt-1">LGC.G / LDF</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Ley General de Contabilidad Gubernamental y Ley de Disciplina Financiera.
+            Documentos PDF de Ley General de Contabilidad Gubernamental y Ley
+            de Disciplina Financiera. Aparecen en la sección{" "}
+            <strong>Transparencia</strong> del sitio público.
           </p>
         </div>
         <Link
