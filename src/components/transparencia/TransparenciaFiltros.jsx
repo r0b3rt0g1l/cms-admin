@@ -6,7 +6,12 @@ const INPUT_CLASS =
   "border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-guinda focus:border-transparent";
 const LABEL_CLASS = "block text-xs font-medium text-gray-600 mb-1";
 
-export default function TransparenciaFiltros({ anioActivo, trimestreActivo }) {
+export default function TransparenciaFiltros({
+  anioActivo,
+  trimestreActivo,
+  categoriaActiva,
+  categorias,
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -34,7 +39,9 @@ export default function TransparenciaFiltros({ anioActivo, trimestreActivo }) {
     trimestreActivo != null && trimestreActivo !== ""
       ? String(trimestreActivo)
       : "";
-  const hasFilters = Boolean(anioStr || trimestreStr);
+  const categoriaStr = categoriaActiva || "";
+  const hasCategoriasProp = Array.isArray(categorias) && categorias.length > 0;
+  const hasFilters = Boolean(anioStr || trimestreStr || categoriaStr);
 
   return (
     <div className="flex flex-wrap items-end gap-4 bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
@@ -74,6 +81,27 @@ export default function TransparenciaFiltros({ anioActivo, trimestreActivo }) {
           <option value="4">4°</option>
         </select>
       </div>
+
+      {hasCategoriasProp && (
+        <div>
+          <label htmlFor="filtro-categoria" className={LABEL_CLASS}>
+            Categoría
+          </label>
+          <select
+            id="filtro-categoria"
+            value={categoriaStr}
+            onChange={(e) => updateParam("categoria", e.target.value)}
+            className={INPUT_CLASS}
+          >
+            <option value="">Todas</option>
+            {categorias.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {hasFilters && (
         <button

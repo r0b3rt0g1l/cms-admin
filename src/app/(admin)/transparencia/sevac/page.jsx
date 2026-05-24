@@ -8,6 +8,31 @@ export const metadata = {
   title: "Transparencia · SEvAC — CMS Municipal",
 };
 
+// Categorías canon para el filtro de SEvAC. Mismas 5 que tiene el datalist
+// del SevacForm (BOLETIN_OFICIAL, INFORME_TRIMESTRAL, CUENTA_PUBLICA,
+// PRESUPUESTO_EGRESOS, LEY_INGRESOS). Labels en español para la UI.
+const SEVAC_CATEGORIAS = [
+  { value: "BOLETIN_OFICIAL", label: "Boletín Oficial" },
+  { value: "INFORME_TRIMESTRAL", label: "Informe Trimestral" },
+  { value: "CUENTA_PUBLICA", label: "Cuenta Pública" },
+  { value: "PRESUPUESTO_EGRESOS", label: "Presupuesto de Egresos" },
+  { value: "LEY_INGRESOS", label: "Ley de Ingresos" },
+];
+
+// Filtro tolerante: matchea aunque la categoría guardada en BD use espacios,
+// acentos o mayúsculas distintas (caso de los docs heredados de Arivechi).
+// Keep in sync con la implementación equivalente en
+// /Users/robertogil/Developer/San-Javier/app/transparencia/sevac/page.js
+function normalizeCategoria(s) {
+  if (!s) return "";
+  return String(s)
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_");
+}
+
 const FLASH_MESSAGES = {
   created: "Documento creado correctamente.",
   updated: "Documento actualizado correctamente.",
@@ -55,10 +80,20 @@ export default async function SevacPage({ searchParams }) {
   let documentos = [];
   let loadError = null;
   try {
-    const data = await getSevac({ anio, trimestre, categoria });
+    // No pasamos `categoria` al backend para permitir filtro tolerante
+    // client-side (los docs heredados de Arivechi tienen labels con
+    // espacios/acentos que no matchean por igualdad exacta del backend).
+    const data = await getSevac({ anio, trimestre });
     documentos = Array.isArray(data) ? data : [];
   } catch (err) {
     loadError = err?.message || "No se pudieron cargar los documentos SEvAC.";
+  }
+
+  if (categoria) {
+    const target = normalizeCategoria(categoria);
+    documentos = documentos.filter(
+      (d) => normalizeCategoria(d.categoria) === target,
+    );
   }
 
   return (
@@ -98,7 +133,12 @@ export default async function SevacPage({ searchParams }) {
       )}
 
       <div className="mb-4">
-        <TransparenciaFiltros anioActivo={anio} trimestreActivo={trimestre} />
+        <TransparenciaFiltros
+          anioActivo={anio}
+          trimestreActivo={trimestre}
+          categoriaActiva={categoria}
+          categorias={SEVAC_CATEGORIAS}
+        />
       </div>
 
       {documentos.length === 0 && !loadError ? (
