@@ -10,9 +10,10 @@ export default async function ImagenesPage() {
     <div className="p-8">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Imágenes</h1>
+          <h1 className="text-3xl font-bold">Galería</h1>
           <p className="text-gray-600 mt-1">
-            Administra las imágenes del portal por sección.
+            Fotos de actividades, eventos y obras. Aparecen en la sección{" "}
+            <strong>Galería</strong> del sitio público.
           </p>
         </div>
         <Link
@@ -20,7 +21,7 @@ export default async function ImagenesPage() {
           style={{ backgroundColor: '#7d1d3f', color: 'white' }}
           className="px-4 py-2 rounded-md hover:opacity-90 transition"
         >
-          + Subir imagen
+          + Subir foto
         </Link>
       </div>
 

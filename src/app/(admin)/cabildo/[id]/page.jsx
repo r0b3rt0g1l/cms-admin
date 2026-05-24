@@ -13,8 +13,8 @@ function avatarFallback(nombre) {
 }
 
 const FLASH = {
-  updated: "Datos del miembro actualizados.",
-  fotoUpdated: "Fotografía actualizada.",
+  updated: "✓ Cambios guardados. Ya se reflejan en el sitio.",
+  fotoUpdated: "✓ Fotografía actualizada.",
 };
 
 export default async function MiembroCabildoDetailPage({ params, searchParams }) {
@@ -35,7 +35,7 @@ export default async function MiembroCabildoDetailPage({ params, searchParams })
         <Link href="/cabildo" className="text-sm text-gray-500 hover:text-gray-800">
           ← Volver al directorio
         </Link>
-        <h1 className="text-3xl font-bold mt-2">Editar miembro del cabildo</h1>
+        <h1 className="text-3xl font-bold mt-2">Editar persona del cabildo</h1>
         {miembro && (
           <p className="text-gray-600 mt-1 truncate">
             {miembro.nombre} —{" "}
@@ -47,7 +47,7 @@ export default async function MiembroCabildoDetailPage({ params, searchParams })
       </div>
 
       {flashMessage && (
-        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-md mb-4">
+        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-md mb-4 font-medium">
           {flashMessage}
         </div>
       )}
@@ -87,10 +87,12 @@ export default async function MiembroCabildoDetailPage({ params, searchParams })
 
           <div className="bg-white rounded-lg border border-red-200 p-6 space-y-3">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Eliminar miembro</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Eliminar persona del directorio
+              </h2>
               <p className="text-sm text-gray-600 mt-1">
-                Esta acción es permanente. Si el miembro tenía fotografía, también se
-                borra de Cloudinary.
+                Quita a esta persona del sitio público de forma permanente. Si
+                tiene fotografía, también se borra. <strong>No se puede deshacer.</strong>
               </p>
             </div>
             <div className="flex justify-end">

@@ -15,10 +15,10 @@ export default function UpdateFuncionarioForm({ miembro }) {
       <input type="hidden" name="id" value={miembro.id} />
 
       <div>
-        <h2 className="text-lg font-semibold">Datos del miembro</h2>
+        <h2 className="text-lg font-semibold">Datos de la persona</h2>
         <p className="text-sm text-gray-600 mt-1">
-          Edita los textos, orden y visibilidad. La fotografía se cambia en la
-          sección de abajo.
+          Edita el nombre, cargo, tipo y datos de contacto. La fotografía se
+          cambia o sube en la sección de abajo.
         </p>
       </div>
 
@@ -29,7 +29,7 @@ export default function UpdateFuncionarioForm({ miembro }) {
       )}
 
       <div>
-        <label className="block text-sm font-medium mb-2">Tipo *</label>
+        <label className="block text-sm font-medium mb-2">Tipo de persona *</label>
         <select
           name="tipo"
           required
@@ -45,6 +45,9 @@ export default function UpdateFuncionarioForm({ miembro }) {
             </option>
           ))}
         </select>
+        <p className="text-xs text-gray-500 mt-1">
+          Decide en qué grupo aparece en el sitio.
+        </p>
       </div>
 
       <div>
@@ -69,6 +72,10 @@ export default function UpdateFuncionarioForm({ miembro }) {
           maxLength={120}
           className="w-full border border-gray-300 rounded-md px-3 py-2"
         />
+        <p className="text-xs text-gray-500 mt-1">
+          Ej. <em>Presidente Municipal</em>, <em>Síndico Municipal</em>,{" "}
+          <em>Regidor/a de Obras</em>.
+        </p>
       </div>
 
       <div>
@@ -133,7 +140,9 @@ export default function UpdateFuncionarioForm({ miembro }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
         <div>
-          <label className="block text-sm font-medium mb-2">Orden</label>
+          <label className="block text-sm font-medium mb-2">
+            Orden en el portal
+          </label>
           <input
             type="number"
             name="orden"
@@ -142,6 +151,9 @@ export default function UpdateFuncionarioForm({ miembro }) {
             max={99}
             className="w-full border border-gray-300 rounded-md px-3 py-2"
           />
+          <p className="text-xs text-gray-500 mt-1">
+            Menor = aparece primero dentro de su grupo.
+          </p>
         </div>
 
         <label className="flex items-center gap-2 pb-2">
@@ -151,7 +163,9 @@ export default function UpdateFuncionarioForm({ miembro }) {
             defaultChecked={miembro.activo}
             className="h-4 w-4"
           />
-          <span className="text-sm">Miembro activo (visible en el portal)</span>
+          <span className="text-sm">
+            Visible en el sitio público
+          </span>
         </label>
       </div>
 

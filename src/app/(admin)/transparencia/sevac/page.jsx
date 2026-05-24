@@ -70,7 +70,9 @@ export default async function SevacPage({ searchParams }) {
           </p>
           <h1 className="text-2xl font-semibold text-gray-900 mt-1">SEvAC</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Sistema de Evaluación de la Armonización Contable.
+            Documentos PDF del Sistema de Evaluación de la Armonización Contable
+            (boletines oficiales, informes trimestrales, cuenta pública, etc).
+            Aparecen en la sección <strong>Transparencia</strong> del sitio público.
           </p>
         </div>
         <Link
