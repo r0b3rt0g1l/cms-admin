@@ -26,6 +26,12 @@ const NAV = [
   },
   { href: "/imagenes", label: "Galería" },
   {
+    label: "Apariencia",
+    children: [
+      { href: "/apariencia/portada-historia", label: "Imagen de Portada (Historia)" },
+    ],
+  },
+  {
     label: "Transparencia",
     children: [
       { href: "/transparencia/lgc-g-ldf", label: "LGC.G / LDF" },

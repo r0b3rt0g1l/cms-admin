@@ -30,6 +30,9 @@ import {
   updateFuncionario,
   replaceFuncionarioFoto,
   deleteFuncionario,
+  getPortadaHistoria,
+  replacePortadaHistoria,
+  deletePortadaHistoria,
 } from "./api";
 
 const TOKEN_COOKIE = "token";
@@ -530,4 +533,42 @@ export async function deleteFuncionarioAction(prevState, formData) {
   }
   revalidatePath("/cabildo");
   redirect("/cabildo?deleted=1");
+}
+
+// === Apariencia: Portada de Historia — server actions ===
+
+export async function getPortadaHistoriaAction() {
+  try {
+    const data = await getPortadaHistoria();
+    return { data };
+  } catch (err) {
+    return { error: describeError(err) };
+  }
+}
+
+export async function replacePortadaHistoriaAction(prevState, formData) {
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) {
+    return { error: "Selecciona una imagen para subir." };
+  }
+
+  try {
+    await replacePortadaHistoria(formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/apariencia/portada-historia");
+  redirect("/apariencia/portada-historia?updated=1");
+}
+
+export async function restorePortadaHistoriaAction(prevState, formData) {
+  try {
+    await deletePortadaHistoria();
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/apariencia/portada-historia");
+  redirect("/apariencia/portada-historia?restored=1");
 }
