@@ -314,6 +314,29 @@ export async function updateSevac(id, formData) {
   );
 }
 
+// === Apariencia: Portada de Historia ===
+
+export async function getPortadaHistoria() {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/portada-historia`);
+}
+
+export async function replacePortadaHistoria(formData) {
+  const slug = await getMunicipioSlug();
+  return apiUpload(
+    `/api/municipios/${slug}/portada-historia`,
+    formData,
+    "PUT",
+  );
+}
+
+export async function deletePortadaHistoria() {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/portada-historia`, {
+    method: "DELETE",
+  });
+}
+
 // === Cabildo: Funcionarios (PR2) ===
 
 export async function getFuncionarios(filtros = {}) {
