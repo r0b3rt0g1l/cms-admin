@@ -7,7 +7,7 @@ municipio: noticias, fotos, imágenes de portada y datos del gobierno.
 
 ## Cómo entrar
 
-1. Abra en su navegador la dirección: **[DIRECCIÓN DEL PANEL]**
+1. Abra en su navegador la dirección: **https://cms-admin-taupe.vercel.app/login**
 2. Escriba su **Correo electrónico** y su **Contraseña**.
 3. Presione **Iniciar sesión**.
 
@@ -66,4 +66,4 @@ lugar correcto. A la izquierda está el menú con las secciones: **Inicio**, **G
 - **Fotos justas.** Use imágenes con buena resolución, pero no enormes: los archivos muy pesados hacen lenta la página.
 
 ## ¿Algo falla?
-Escriba a soporte: **[CONTACTO DE SOPORTE NORTHA]**
+Comuníquese con su contacto de soporte de **Northa Digital** (el que ya le compartieron).
