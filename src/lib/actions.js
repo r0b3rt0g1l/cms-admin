@@ -414,7 +414,16 @@ export async function deleteSevacTransparenciaAction(formData) {
 
 // === Cabildo: server actions ===
 
-const TIPOS_CABILDO_VALIDOS = ["PRESIDENTE", "SINDICA", "REGIDOR", "DIF"];
+const TIPOS_CABILDO_VALIDOS = [
+  "PRESIDENTE",
+  "SINDICA",
+  "REGIDOR",
+  "DIF",
+  "SECRETARIO",
+  "TESORERO",
+  "CONTRALOR",
+  "OTRO",
+];
 
 export async function listFuncionariosAction() {
   try {
@@ -440,9 +449,9 @@ export async function createFuncionarioAction(prevState, formData) {
   const tipo = String(formData.get("tipo") || "").trim();
   if (!nombre) return { error: "Falta el nombre de la persona." };
   if (!cargo) return { error: "Falta el cargo. Ej: Presidente Municipal, Síndico Municipal, Regidor/a." };
-  if (!tipo) return { error: "Selecciona el tipo de persona (Presidente, Síndico/a, Regidor/a o DIF)." };
+  if (!tipo) return { error: "Selecciona el cargo o categoría de la persona." };
   if (!TIPOS_CABILDO_VALIDOS.includes(tipo)) {
-    return { error: "Tipo de persona inválido." };
+    return { error: "Cargo o categoría inválido." };
   }
 
   // Foto es opcional al crear. Si no se subió archivo, lo quitamos del FormData
@@ -474,9 +483,9 @@ export async function updateFuncionarioAction(prevState, formData) {
   const tipoRaw = String(formData.get("tipo") || "").trim();
   if (!nombre) return { error: "Falta el nombre de la persona." };
   if (!cargo) return { error: "Falta el cargo. Ej: Presidente Municipal, Síndico Municipal, Regidor/a." };
-  if (!tipoRaw) return { error: "Selecciona el tipo de persona (Presidente, Síndico/a, Regidor/a o DIF)." };
+  if (!tipoRaw) return { error: "Selecciona el cargo o categoría de la persona." };
   if (!TIPOS_CABILDO_VALIDOS.includes(tipoRaw)) {
-    return { error: "Tipo de persona inválido." };
+    return { error: "Cargo o categoría inválido." };
   }
 
   const data = {

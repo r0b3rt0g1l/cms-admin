@@ -1,11 +1,21 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { updateFuncionarioAction } from "@/lib/actions";
-import { TIPOS_CABILDO } from "@/lib/cabildo-constants";
+import { TIPOS_CABILDO, CARGO_SUGERIDO } from "@/lib/cabildo-constants";
 
 export default function UpdateFuncionarioForm({ miembro }) {
   const [state, formAction, pending] = useActionState(updateFuncionarioAction, {});
+  const [tipo, setTipo] = useState(miembro.tipo || "");
+  const [cargo, setCargo] = useState(miembro.cargo || "");
+
+  // Patrón híbrido: al cambiar la categoría se prefilla el cargo sugerido
+  // (editable); "Otros cargos" (OTRO) lo deja en blanco para texto libre.
+  function handleTipoChange(e) {
+    const value = e.target.value;
+    setTipo(value);
+    setCargo(value && value !== "OTRO" ? CARGO_SUGERIDO[value] ?? "" : "");
+  }
 
   return (
     <form
@@ -29,15 +39,16 @@ export default function UpdateFuncionarioForm({ miembro }) {
       )}
 
       <div>
-        <label className="block text-sm font-medium mb-2">Tipo de persona *</label>
+        <label className="block text-sm font-medium mb-2">Cargo o categoría *</label>
         <select
           name="tipo"
           required
-          defaultValue={miembro.tipo || ""}
+          value={tipo}
+          onChange={handleTipoChange}
           className="w-full border border-gray-300 rounded-md px-3 py-2 bg-white"
         >
           <option value="" disabled>
-            — Selecciona el tipo —
+            — Selecciona el cargo o categoría —
           </option>
           {TIPOS_CABILDO.map((t) => (
             <option key={t.value} value={t.value}>
@@ -46,7 +57,9 @@ export default function UpdateFuncionarioForm({ miembro }) {
           ))}
         </select>
         <p className="text-xs text-gray-500 mt-1">
-          Decide en qué grupo aparece en el sitio.
+          Define el grupo en que aparece en el sitio. Al cambiarlo se sugiere el
+          cargo (editable). Usa <strong>“Otros cargos”</strong> para secretaría,
+          tesorería, comisarías u otro puesto.
         </p>
       </div>
 
@@ -68,12 +81,13 @@ export default function UpdateFuncionarioForm({ miembro }) {
           type="text"
           name="cargo"
           required
-          defaultValue={miembro.cargo || ""}
+          value={cargo}
+          onChange={(e) => setCargo(e.target.value)}
           maxLength={120}
           className="w-full border border-gray-300 rounded-md px-3 py-2"
         />
         <p className="text-xs text-gray-500 mt-1">
-          Ej. <em>Presidente Municipal</em>, <em>Síndico Municipal</em>,{" "}
+          Texto que se muestra en el sitio. Puedes ajustarlo, ej.{" "}
           <em>Regidor/a de Obras</em>.
         </p>
       </div>

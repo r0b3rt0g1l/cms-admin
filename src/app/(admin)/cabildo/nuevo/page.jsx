@@ -3,12 +3,22 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { createFuncionarioAction } from "@/lib/actions";
-import { TIPOS_CABILDO } from "@/lib/cabildo-constants";
+import { TIPOS_CABILDO, CARGO_SUGERIDO } from "@/lib/cabildo-constants";
 
 export default function NuevoMiembroCabildoPage() {
   const [state, formAction, pending] = useActionState(createFuncionarioAction, {});
   const [preview, setPreview] = useState(null);
   const [fileName, setFileName] = useState("");
+  const [tipo, setTipo] = useState("");
+  const [cargo, setCargo] = useState("");
+
+  // Patrón híbrido: al elegir una categoría se prefilla el cargo sugerido
+  // (editable); "Otros cargos" (OTRO) lo deja en blanco para texto libre.
+  function handleTipoChange(e) {
+    const value = e.target.value;
+    setTipo(value);
+    setCargo(value && value !== "OTRO" ? CARGO_SUGERIDO[value] ?? "" : "");
+  }
 
   function handleFileChange(e) {
     const file = e.target.files?.[0];
@@ -49,15 +59,16 @@ export default function NuevoMiembroCabildoPage() {
         className="bg-white rounded-lg border border-gray-200 p-6 space-y-5"
       >
         <div>
-          <label className="block text-sm font-medium mb-2">Tipo de persona *</label>
+          <label className="block text-sm font-medium mb-2">Cargo o categoría *</label>
           <select
             name="tipo"
             required
-            defaultValue=""
+            value={tipo}
+            onChange={handleTipoChange}
             className="w-full border border-gray-300 rounded-md px-3 py-2 bg-white"
           >
             <option value="" disabled>
-              — Selecciona el tipo —
+              — Selecciona el cargo o categoría —
             </option>
             {TIPOS_CABILDO.map((t) => (
               <option key={t.value} value={t.value}>
@@ -66,8 +77,10 @@ export default function NuevoMiembroCabildoPage() {
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            ¿Es presidente, síndico/a, regidor/a o presidencia del DIF? Esto
-            decide en qué grupo aparece en el sitio.
+            Define el grupo en que aparece en el sitio. Al elegir uno se sugiere
+            el cargo (editable). Usa <strong>“Otros cargos”</strong> para
+            secretaría, tesorería, comisarías u otro puesto y escribe el cargo a
+            mano.
           </p>
         </div>
 
@@ -91,12 +104,17 @@ export default function NuevoMiembroCabildoPage() {
               name="cargo"
               required
               maxLength={120}
-              placeholder="Ej. Presidente Municipal"
+              value={cargo}
+              onChange={(e) => setCargo(e.target.value)}
+              placeholder={
+                tipo === "OTRO" ? "Ej. Comisario de La Aurora" : "Ej. Presidente Municipal"
+              }
               className="w-full border border-gray-300 rounded-md px-3 py-2"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Ej. <em>Presidente Municipal</em>, <em>Síndico Municipal</em>,{" "}
-              <em>Regidor/a de Obras</em>.
+              {tipo === "OTRO"
+                ? "Escribe el cargo tal cual debe verse en el sitio."
+                : "Texto que se muestra en el sitio. Puedes ajustarlo, ej. Regidor/a de Obras."}
             </p>
           </div>
         </div>
