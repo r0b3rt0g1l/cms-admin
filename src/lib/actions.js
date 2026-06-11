@@ -37,7 +37,9 @@ import {
 
 const TOKEN_COOKIE = "token";
 const USER_COOKIE = "usuario";
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+// Alineado con la expiración del JWT del backend (24h). Más allá de esto el
+// token ya no verifica, así que no tiene sentido conservar la cookie.
+const COOKIE_MAX_AGE = 60 * 60 * 24;
 
 const baseCookieOptions = {
   httpOnly: true,

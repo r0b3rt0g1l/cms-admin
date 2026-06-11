@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
@@ -15,21 +16,18 @@ async function authHeader() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-// Resuelve el slug del municipio activo a partir de la cookie `usuario`.
-// Fallback: si la cookie es vieja (pre-deploy FASE A, sin municipioSlug)
-// o está corrupta, refresca el dato vía GET /api/auth/me.
+// Trae el usuario autenticado desde el backend (derivado del JWT, lado
+// servidor). Memoizado por request con cache() para no repetir el fetch en
+// cada llamada a la API dentro del mismo render/acción.
+const fetchMe = cache(async () => apiFetch("/api/auth/me"));
+
+// Resuelve el slug del municipio activo SIEMPRE desde /api/auth/me (autoritativo,
+// derivado del JWT en el backend). Antes se leía de la cookie `usuario`, que es
+// manipulable: un admin podía alterarla para apuntar a otro municipio y redirigir
+// sus escrituras. El backend (assertSameTenant) es la defensa dura; esto evita
+// además construir URLs hacia un tenant ajeno.
 async function getMunicipioSlug() {
-  const store = await cookies();
-  const raw = store.get("usuario")?.value;
-  if (raw) {
-    try {
-      const usuario = JSON.parse(raw);
-      if (usuario.municipioSlug) return usuario.municipioSlug;
-    } catch {
-      // cae al fallback
-    }
-  }
-  const me = await apiFetch("/api/auth/me");
+  const me = await fetchMe();
   if (me?.municipioSlug) return me.municipioSlug;
   throw new ApiError("Sesión incompleta — vuelve a iniciar sesión", 401);
 }
