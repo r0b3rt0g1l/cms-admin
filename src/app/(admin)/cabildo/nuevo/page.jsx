@@ -3,21 +3,30 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { createFuncionarioAction } from "@/lib/actions";
-import { TIPOS_CABILDO, CARGO_SUGERIDO } from "@/lib/cabildo-constants";
+import {
+  CATEGORIAS_CABILDO,
+  CATEGORIA_BY_ID,
+  GRUPOS_CABILDO,
+} from "@/lib/cabildo-constants";
 
 export default function NuevoMiembroCabildoPage() {
   const [state, formAction, pending] = useActionState(createFuncionarioAction, {});
   const [preview, setPreview] = useState(null);
   const [fileName, setFileName] = useState("");
-  const [tipo, setTipo] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [tipoEnum, setTipoEnum] = useState("");
   const [cargo, setCargo] = useState("");
 
-  // Patrón híbrido: al elegir una categoría se prefilla el cargo sugerido
-  // (editable); "Otros cargos" (OTRO) lo deja en blanco para texto libre.
-  function handleTipoChange(e) {
-    const value = e.target.value;
-    setTipo(value);
-    setCargo(value && value !== "OTRO" ? CARGO_SUGERIDO[value] ?? "" : "");
+  // El <select> elige una CATEGORÍA (id único); el enum real que recibe el
+  // backend viaja en un input oculto `tipo`. Al elegir, se prellena el cargo
+  // sugerido (editable); el "Otro cargo (especificar)" lo deja en blanco.
+  const categoriaLibre = CATEGORIA_BY_ID[categoria]?.cargoSugerido === "";
+  function handleCategoriaChange(e) {
+    const id = e.target.value;
+    const entry = CATEGORIA_BY_ID[id];
+    setCategoria(id);
+    setTipoEnum(entry?.tipo ?? "");
+    setCargo(entry?.cargoSugerido ?? "");
   }
 
   function handleFileChange(e) {
@@ -43,8 +52,8 @@ export default function NuevoMiembroCabildoPage() {
         </Link>
         <h1 className="text-3xl font-bold mt-2">Nueva persona del cabildo</h1>
         <p className="text-gray-600 mt-1">
-          Agrega a una persona del cabildo (presidente, síndico/a, regidor/a o
-          presidencia del DIF). La foto es opcional y la puedes subir después.
+          Agrega a una persona del directorio: cabildo, áreas administrativas,
+          organismos o comisarías. La foto es opcional y la puedes subir después.
         </p>
       </div>
 
@@ -61,26 +70,35 @@ export default function NuevoMiembroCabildoPage() {
         <div>
           <label className="block text-sm font-medium mb-2">Cargo o categoría *</label>
           <select
-            name="tipo"
+            name="categoria"
             required
-            value={tipo}
-            onChange={handleTipoChange}
+            value={categoria}
+            onChange={handleCategoriaChange}
             className="w-full border border-gray-300 rounded-md px-3 py-2 bg-white"
           >
             <option value="" disabled>
               — Selecciona el cargo o categoría —
             </option>
-            {TIPOS_CABILDO.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
+            {/* Texto libre: primera opción real, fuera de grupo. */}
+            <option value={CATEGORIA_BY_ID.OTRO.id}>
+              {CATEGORIA_BY_ID.OTRO.label}
+            </option>
+            {GRUPOS_CABILDO.filter((grupo) => grupo !== "Otro").map((grupo) => (
+              <optgroup key={grupo} label={grupo}>
+                {CATEGORIAS_CABILDO.filter((c) => c.grupo === grupo).map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.label}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
+          {/* El enum real (TipoMiembroCabildo) que consume el backend. */}
+          <input type="hidden" name="tipo" value={tipoEnum} />
           <p className="text-xs text-gray-500 mt-1">
-            Define el grupo en que aparece en el sitio. Al elegir uno se sugiere
-            el cargo (editable). Usa <strong>“Otros cargos”</strong> para
-            secretaría, tesorería, comisarías u otro puesto y escribe el cargo a
-            mano.
+            Define el grupo en que aparece en el sitio. Al elegir una categoría se
+            sugiere el cargo (editable). Si el puesto no está en la lista, usa{" "}
+            <strong>“Otro cargo (especificar)”</strong> y escríbelo a mano.
           </p>
         </div>
 
@@ -107,12 +125,12 @@ export default function NuevoMiembroCabildoPage() {
               value={cargo}
               onChange={(e) => setCargo(e.target.value)}
               placeholder={
-                tipo === "OTRO" ? "Ej. Comisario de La Aurora" : "Ej. Presidente Municipal"
+                categoriaLibre ? "Ej. Dirección de Cultura" : "Ej. Presidente Municipal"
               }
               className="w-full border border-gray-300 rounded-md px-3 py-2"
             />
             <p className="text-xs text-gray-500 mt-1">
-              {tipo === "OTRO"
+              {categoriaLibre
                 ? "Escribe el cargo tal cual debe verse en el sitio."
                 : "Texto que se muestra en el sitio. Puedes ajustarlo, ej. Regidor/a de Obras."}
             </p>
