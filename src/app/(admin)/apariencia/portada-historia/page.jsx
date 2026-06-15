@@ -32,7 +32,7 @@ export default async function PortadaHistoriaPage({ searchParams }) {
         <h1 className="text-3xl font-bold mt-2">Imagen de Portada (Historia)</h1>
         <p className="text-gray-600 mt-1">
           Imagen panorámica grande que aparece detrás del título{" "}
-          <em>"Real de Minas de San Javier"</em> en la sección{" "}
+          <em>&quot;Real de Minas de San Javier&quot;</em> en la sección{" "}
           <strong>Historia</strong> de la página de inicio del sitio.
           Recomendado: foto horizontal panorámica de alta calidad, mínimo
           1920 × 1080 píxeles.
