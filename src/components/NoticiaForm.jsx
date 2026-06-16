@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 
@@ -39,6 +39,21 @@ export default function NoticiaForm({ action, initialData = null, submitLabel = 
   const router = useRouter();
   const [state, formAction] = useActionState(action, INITIAL_STATE);
   const editing = Boolean(initialData?.id);
+
+  // Preview de la imagen: arranca con la actual (al editar) y cambia a la nueva si se elige archivo.
+  const [preview, setPreview] = useState(initialData?.imagenUrl ?? null);
+  const [fileName, setFileName] = useState("");
+
+  function handleFileChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setFileName("");
+      setPreview(initialData?.imagenUrl ?? null);
+      return;
+    }
+    setFileName(file.name);
+    setPreview(file.type.startsWith("image/") ? URL.createObjectURL(file) : null);
+  }
 
   return (
     <form action={formAction} className="space-y-5 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
@@ -86,19 +101,28 @@ export default function NoticiaForm({ action, initialData = null, submitLabel = 
       </div>
 
       <div>
-        <label htmlFor="imagenUrl" className="block text-sm font-medium text-gray-700 mb-1">
-          URL de imagen (opcional)
+        <label htmlFor="archivo" className="block text-sm font-medium text-gray-700 mb-1">
+          Imagen {editing ? "(opcional — sube una nueva para reemplazarla)" : "(obligatoria)"}
         </label>
         <input
-          id="imagenUrl"
-          name="imagenUrl"
-          type="url"
-          defaultValue={initialData?.imagenUrl ?? ""}
-          placeholder="https://res.cloudinary.com/.../upload/..."
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-guinda focus:border-transparent"
+          id="archivo"
+          name="archivo"
+          type="file"
+          accept="image/*"
+          required={!editing}
+          onChange={handleFileChange}
+          className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-guinda file:text-white file:cursor-pointer hover:file:opacity-90"
         />
+        {fileName && (
+          <p className="text-xs text-gray-500 mt-1">Seleccionado: {fileName}</p>
+        )}
+        {preview && (
+          <div className="mt-3 border border-gray-200 rounded-md overflow-hidden w-48 h-32">
+            <img src={preview} alt="Vista previa" className="w-full h-full object-cover" />
+          </div>
+        )}
         <p className="text-xs text-gray-500 mt-1">
-          Sube primero la foto en la sección <strong>Imágenes</strong> y pega aquí su URL.
+          Se sube directo a Cloudinary. {editing ? "Si no eliges una nueva, se conserva la actual." : "Obligatoria para crear la noticia."}
         </p>
       </div>
 

@@ -4,17 +4,6 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { ApiError, createNoticia, deleteNoticia, updateNoticia } from "@/lib/api";
 
-function readPayload(formData) {
-  return {
-    titulo: String(formData.get("titulo") || "").trim(),
-    extracto: String(formData.get("extracto") || "").trim(),
-    contenido: String(formData.get("contenido") || "").trim(),
-    categoria: String(formData.get("categoria") || "general"),
-    estado: String(formData.get("estado") || "publicado"),
-    imagenUrl: String(formData.get("imagenUrl") || "").trim() || null,
-  };
-}
-
 function describeError(err) {
   if (err instanceof ApiError) {
     if (err.status === 401) return "Tu sesión expiró. Vuelve a iniciar sesión.";
@@ -25,13 +14,20 @@ function describeError(err) {
 }
 
 export async function createNoticiaAction(_prevState, formData) {
-  const data = readPayload(formData);
-  if (!data.titulo || !data.contenido) {
+  const titulo = String(formData.get("titulo") || "").trim();
+  const contenido = String(formData.get("contenido") || "").trim();
+  if (!titulo || !contenido) {
     return { error: "Título y contenido son obligatorios." };
   }
 
+  // Imagen OBLIGATORIA al crear (además de la validación del backend).
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) {
+    return { error: "La imagen es obligatoria al crear la noticia." };
+  }
+
   try {
-    await createNoticia(data);
+    await createNoticia(formData);
   } catch (err) {
     return { error: describeError(err) };
   }
@@ -45,13 +41,21 @@ export async function updateNoticiaAction(_prevState, formData) {
   const id = String(formData.get("id") || "");
   if (!id) return { error: "Falta el identificador de la noticia." };
 
-  const data = readPayload(formData);
-  if (!data.titulo || !data.contenido) {
+  const titulo = String(formData.get("titulo") || "").trim();
+  const contenido = String(formData.get("contenido") || "").trim();
+  if (!titulo || !contenido) {
     return { error: "Título y contenido son obligatorios." };
   }
 
+  // Imagen OPCIONAL al editar: si no se eligió archivo, se quita del FormData para que multer no
+  // reciba un campo vacío y el backend conserve la imagen actual.
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) {
+    formData.delete("archivo");
+  }
+
   try {
-    await updateNoticia(id, data);
+    await updateNoticia(id, formData);
   } catch (err) {
     return { error: describeError(err) };
   }

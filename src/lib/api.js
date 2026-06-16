@@ -96,20 +96,14 @@ export async function getNoticia(id) {
   return noticia ?? null;
 }
 
-export async function createNoticia(data) {
+export async function createNoticia(formData) {
   const slug = await getMunicipioSlug();
-  return apiFetch(`/api/municipios/${slug}/noticias`, {
-    method: "POST",
-    body: data,
-  });
+  return apiUpload(`/api/municipios/${slug}/noticias`, formData);
 }
 
-export async function updateNoticia(id, data) {
+export async function updateNoticia(id, formData) {
   const slug = await getMunicipioSlug();
-  return apiFetch(`/api/municipios/${slug}/noticias/${id}`, {
-    method: "PUT",
-    body: data,
-  });
+  return apiUpload(`/api/municipios/${slug}/noticias/${id}`, formData, "PUT");
 }
 
 export async function deleteNoticia(id) {
