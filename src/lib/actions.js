@@ -414,17 +414,6 @@ export async function deleteSevacTransparenciaAction(formData) {
 
 // === Cabildo: server actions ===
 
-const TIPOS_CABILDO_VALIDOS = [
-  "PRESIDENTE",
-  "SINDICA",
-  "REGIDOR",
-  "DIF",
-  "SECRETARIO",
-  "TESORERO",
-  "CONTRALOR",
-  "OTRO",
-];
-
 export async function listFuncionariosAction() {
   try {
     const data = await getFuncionarios();
@@ -446,13 +435,8 @@ export async function getFuncionarioAction(id) {
 export async function createFuncionarioAction(prevState, formData) {
   const nombre = String(formData.get("nombre") || "").trim();
   const cargo = String(formData.get("cargo") || "").trim();
-  const tipo = String(formData.get("tipo") || "").trim();
   if (!nombre) return { error: "Falta el nombre de la persona." };
   if (!cargo) return { error: "Falta el cargo. Ej: Presidente Municipal, Síndico Municipal, Regidor/a." };
-  if (!tipo) return { error: "Selecciona el cargo o categoría de la persona." };
-  if (!TIPOS_CABILDO_VALIDOS.includes(tipo)) {
-    return { error: "Cargo o categoría inválido." };
-  }
 
   // Foto es opcional al crear. Si no se subió archivo, lo quitamos del FormData
   // para que multer no reciba un campo vacío.
@@ -480,18 +464,12 @@ export async function updateFuncionarioAction(prevState, formData) {
 
   const nombre = String(formData.get("nombre") || "").trim();
   const cargo = String(formData.get("cargo") || "").trim();
-  const tipoRaw = String(formData.get("tipo") || "").trim();
   if (!nombre) return { error: "Falta el nombre de la persona." };
   if (!cargo) return { error: "Falta el cargo. Ej: Presidente Municipal, Síndico Municipal, Regidor/a." };
-  if (!tipoRaw) return { error: "Selecciona el cargo o categoría de la persona." };
-  if (!TIPOS_CABILDO_VALIDOS.includes(tipoRaw)) {
-    return { error: "Cargo o categoría inválido." };
-  }
 
   const data = {
     nombre,
     cargo,
-    tipo: tipoRaw || null,
     area: formData.get("area") || null,
     email: formData.get("email") || null,
     telefono: formData.get("telefono") || null,
