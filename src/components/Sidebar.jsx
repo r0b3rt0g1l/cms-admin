@@ -14,7 +14,8 @@ const NAV = [
   {
     label: "Gobierno",
     children: [
-      { href: "/cabildo", label: "Cabildo Municipal" },
+      { href: "/cabildo", label: "Cabildo" },
+      { href: "/directorio", label: "Directorio" },
     ],
   },
   {

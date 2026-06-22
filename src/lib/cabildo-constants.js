@@ -20,3 +20,13 @@ export const TIPOS_CABILDO = [
 export const TIPO_LABEL = Object.fromEntries(
   TIPOS_CABILDO.map((t) => [t.value, t.label]),
 );
+
+// Dos secciones del panel (cada una es una entrada de menú), filtradas por tipo
+// desde la MISMA lista del backend. DIF va con "Cabildo" (decisión de Roberto).
+export const TIPOS_CABILDO_ELECTOS = ["PRESIDENTE", "SINDICA", "REGIDOR", "DIF"];
+export const TIPOS_DIRECTORIO_OTROS = [
+  "SECRETARIO",
+  "TESORERO",
+  "CONTRALOR",
+  "OTRO",
+];
