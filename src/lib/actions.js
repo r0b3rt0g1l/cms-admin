@@ -356,6 +356,74 @@ export async function deleteDocumentoTransparenciaAction(formData) {
   redirect("/transparencia/lgc-g-ldf?deleted=1");
 }
 
+// === Información Importante (carrusel del inicio) — reusa el endpoint /documentos ===
+const INFO_IMPORTANTE_CATEGORIA = "informacion-importante";
+
+function applyInfoImportante(formData) {
+  // Categoría FIJA (la lee el portal) + tipo PDF; el capturista no la teclea.
+  formData.set("categoria", INFO_IMPORTANTE_CATEGORIA);
+  formData.set("tipo", "PDF");
+  applyPublicado(formData);
+}
+
+export async function createInformacionImportanteAction(prevState, formData) {
+  const titulo = String(formData.get("titulo") || "").trim();
+  if (!titulo) return { error: "El título es obligatorio." };
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) return { error: "Selecciona un PDF para subir." };
+
+  applyInfoImportante(formData);
+
+  try {
+    await createDocumento(formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/informacion-importante");
+  revalidatePath("/");
+  redirect("/informacion-importante?created=1");
+}
+
+export async function updateInformacionImportanteAction(id, prevState, formData) {
+  if (!id) return { error: "Falta el identificador del documento." };
+  const titulo = String(formData.get("titulo") || "").trim();
+  if (!titulo) return { error: "El título es obligatorio." };
+
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) {
+    formData.delete("archivo");
+  }
+
+  applyInfoImportante(formData);
+
+  try {
+    await updateDocumento(id, formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/informacion-importante");
+  revalidatePath(`/informacion-importante/${id}/editar`);
+  redirect("/informacion-importante?updated=1");
+}
+
+export async function deleteInformacionImportanteAction(formData) {
+  const id = String(formData?.get("id") || "");
+  if (!id) redirect("/informacion-importante?deleteError=missing-id");
+  try {
+    await deleteDocumento(id);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    redirect(
+      `/informacion-importante?deleteError=${encodeURIComponent(describeError(err))}`,
+    );
+  }
+  revalidatePath("/informacion-importante");
+  revalidatePath("/");
+  redirect("/informacion-importante?deleted=1");
+}
+
 export async function createSevacTransparenciaAction(prevState, formData) {
   const titulo = String(formData.get("titulo") || "").trim();
   if (!titulo) return { error: "El título es obligatorio." };
