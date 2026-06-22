@@ -437,6 +437,8 @@ export async function createFuncionarioAction(prevState, formData) {
   const cargo = String(formData.get("cargo") || "").trim();
   if (!nombre) return { error: "Falta el nombre de la persona." };
   if (!cargo) return { error: "Falta el cargo. Ej: Presidente Municipal, Síndico Municipal, Regidor/a." };
+  const tipo = String(formData.get("tipo") || "").trim();
+  if (!tipo) return { error: "Selecciona el tipo de la persona (Presidencia, Regiduría, etc.)." };
 
   // Foto es opcional al crear. Si no se subió archivo, lo quitamos del FormData
   // para que multer no reciba un campo vacío.
@@ -454,8 +456,10 @@ export async function createFuncionarioAction(prevState, formData) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
     return { error: describeError(err) };
   }
+  const grupo = String(formData.get("grupo") || "");
   revalidatePath("/cabildo");
-  redirect("/cabildo?created=1");
+  revalidatePath("/directorio");
+  redirect(grupo === "directorio" ? "/directorio?created=1" : "/cabildo?created=1");
 }
 
 export async function updateFuncionarioAction(prevState, formData) {
@@ -466,10 +470,13 @@ export async function updateFuncionarioAction(prevState, formData) {
   const cargo = String(formData.get("cargo") || "").trim();
   if (!nombre) return { error: "Falta el nombre de la persona." };
   if (!cargo) return { error: "Falta el cargo. Ej: Presidente Municipal, Síndico Municipal, Regidor/a." };
+  const tipo = String(formData.get("tipo") || "").trim();
+  if (!tipo) return { error: "Selecciona el tipo de la persona (Presidencia, Regiduría, etc.)." };
 
   const data = {
     nombre,
     cargo,
+    tipo,
     area: formData.get("area") || null,
     email: formData.get("email") || null,
     telefono: formData.get("telefono") || null,

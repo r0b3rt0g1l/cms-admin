@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { updateFuncionarioAction } from "@/lib/actions";
+import { TIPOS_CABILDO } from "@/lib/cabildo-constants";
 
 export default function UpdateFuncionarioForm({ miembro }) {
   const [state, formAction, pending] = useActionState(updateFuncionarioAction, {});
@@ -40,6 +41,28 @@ export default function UpdateFuncionarioForm({ miembro }) {
       </div>
 
       <div>
+        <label className="block text-sm font-medium mb-2">Tipo *</label>
+        <select
+          name="tipo"
+          required
+          defaultValue={miembro.tipo || ""}
+          className="w-full border border-gray-300 rounded-md px-3 py-2 bg-white"
+        >
+          <option value="" disabled>
+            Selecciona un tipo…
+          </option>
+          {TIPOS_CABILDO.map((t) => (
+            <option key={t.value} value={t.value}>
+              {t.label}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-gray-500 mt-1">
+          Define en qué grupo aparece la persona en el sitio.
+        </p>
+      </div>
+
+      <div>
         <label className="block text-sm font-medium mb-2">Cargo *</label>
         <input
           type="text"
@@ -47,12 +70,12 @@ export default function UpdateFuncionarioForm({ miembro }) {
           required
           defaultValue={miembro.cargo || ""}
           maxLength={120}
-          placeholder="Ej. Presidente Municipal, Regidor/a, Director/a de Obras Públicas"
+          placeholder="Ej. Presidente Municipal, Regidora, Tesorera Municipal"
           className="w-full border border-gray-300 rounded-md px-3 py-2"
         />
         <p className="text-xs text-gray-500 mt-1">
-          Texto que se muestra en el sitio. El grupo en el portal se determina por
-          este texto (ej. “Regidor/a”, “Síndico/a”, “Tesorero/a”).
+          Texto tal cual se muestra en el sitio público (ej. “Presidente
+          Municipal”, “Regidora”).
         </p>
       </div>
 
