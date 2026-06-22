@@ -11,6 +11,7 @@ import { logoutAction } from "@/lib/actions";
 // de sus sub-rutas (ver groupOpen abajo).
 const NAV = [
   { href: "/", label: "Inicio" },
+  { href: "/informacion-importante", label: "Información Importante" },
   {
     label: "Gobierno",
     children: [
