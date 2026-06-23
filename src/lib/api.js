@@ -373,3 +373,46 @@ export async function deleteFuncionario(id) {
     method: "DELETE",
   });
 }
+
+// === Estadísticas del home ===
+
+export async function getEstadisticas() {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/estadisticas`);
+}
+
+export async function getEstadistica(id) {
+  const lista = await getEstadisticas();
+  return Array.isArray(lista)
+    ? lista.find((e) => String(e.id) === String(id)) ?? null
+    : null;
+}
+
+export async function createEstadistica(formData) {
+  const slug = await getMunicipioSlug();
+  return apiUpload(`/api/municipios/${slug}/estadisticas`, formData);
+}
+
+export async function updateEstadistica(id, data) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/estadisticas/${id}`, {
+    method: "PUT",
+    body: data,
+  });
+}
+
+export async function replaceEstadisticaIcono(id, formData) {
+  const slug = await getMunicipioSlug();
+  return apiUpload(
+    `/api/municipios/${slug}/estadisticas/${id}/archivo`,
+    formData,
+    "PUT",
+  );
+}
+
+export async function deleteEstadistica(id) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/estadisticas/${id}`, {
+    method: "DELETE",
+  });
+}

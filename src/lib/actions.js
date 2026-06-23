@@ -33,6 +33,10 @@ import {
   getPortadaHistoria,
   replacePortadaHistoria,
   deletePortadaHistoria,
+  createEstadistica,
+  updateEstadistica,
+  replaceEstadisticaIcono,
+  deleteEstadistica,
 } from "./api";
 
 const TOKEN_COOKIE = "token";
@@ -430,6 +434,71 @@ export async function deleteInformacionImportanteAction(formData) {
   revalidatePath("/informacion-importante");
   revalidatePath("/");
   redirect("/informacion-importante?deleted=1");
+}
+
+// === Estadísticas del home ===
+
+export async function createEstadisticaAction(prevState, formData) {
+  const titulo = String(formData.get("titulo") || "").trim();
+  if (!titulo) return { error: "El título es obligatorio." };
+  // valor e icono son opcionales (permite "Por designar"/vacío).
+  formData.set("activo", formData.get("activo") ? "true" : "false");
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) formData.delete("archivo");
+
+  try {
+    await createEstadistica(formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/estadisticas");
+  revalidatePath("/");
+  redirect("/estadisticas?created=1");
+}
+
+export async function updateEstadisticaAction(id, prevState, formData) {
+  if (!id) return { error: "Falta el identificador." };
+  const titulo = String(formData.get("titulo") || "").trim();
+  if (!titulo) return { error: "El título es obligatorio." };
+
+  const data = {
+    titulo,
+    valor: String(formData.get("valor") || ""),
+    orden: Number(formData.get("orden") || 0),
+    activo: Boolean(formData.get("activo")),
+  };
+
+  try {
+    await updateEstadistica(id, data);
+    // Si llega un icono nuevo, se reemplaza aparte (multipart). Si no, se conserva.
+    const archivo = formData.get("archivo");
+    if (archivo && archivo.size > 0) {
+      const fd = new FormData();
+      fd.set("archivo", archivo);
+      await replaceEstadisticaIcono(id, fd);
+    }
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/estadisticas");
+  revalidatePath("/");
+  redirect("/estadisticas?updated=1");
+}
+
+export async function deleteEstadisticaAction(formData) {
+  const id = String(formData?.get("id") || "");
+  if (!id) redirect("/estadisticas?deleteError=missing-id");
+  try {
+    await deleteEstadistica(id);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    redirect(`/estadisticas?deleteError=${encodeURIComponent(describeError(err))}`);
+  }
+  revalidatePath("/estadisticas");
+  revalidatePath("/");
+  redirect("/estadisticas?deleted=1");
 }
 
 export async function createSevacTransparenciaAction(prevState, formData) {

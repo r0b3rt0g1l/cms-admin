@@ -12,6 +12,7 @@ import { logoutAction } from "@/lib/actions";
 const NAV = [
   { href: "/", label: "Inicio" },
   { href: "/informacion-importante", label: "Información Importante" },
+  { href: "/estadisticas", label: "Estadísticas" },
   {
     label: "Gobierno",
     children: [
