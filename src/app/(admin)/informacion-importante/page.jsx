@@ -37,6 +37,19 @@ function PublicadoBadge({ publicado }) {
   );
 }
 
+function TipoBadge({ tipo }) {
+  const esPdf = (tipo || "PDF") === "PDF";
+  return (
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+        esPdf ? "bg-amber-100 text-amber-800" : "bg-blue-100 text-blue-800"
+      }`}
+    >
+      {esPdf ? "PDF" : "Imagen"}
+    </span>
+  );
+}
+
 export default async function InformacionImportantePage({ searchParams }) {
   const sp = (await searchParams) ?? {};
   const flashKey = ["created", "updated", "deleted"].find((k) => sp[k]);
@@ -63,9 +76,9 @@ export default async function InformacionImportantePage({ searchParams }) {
             Información Importante
           </h1>
           <p className="text-sm text-gray-600 mt-1">
-            Documentos PDF que aparecen en el <strong>carrusel del inicio</strong>{" "}
-            del sitio. Sube el PDF; la miniatura de la primera página se genera
-            sola.
+            Documentos PDF o imágenes que aparecen en el{" "}
+            <strong>carrusel del inicio</strong> del sitio. Sube el archivo; para
+            PDF la miniatura de la primera página se genera sola.
           </p>
         </div>
         <Link
@@ -114,6 +127,7 @@ export default async function InformacionImportantePage({ searchParams }) {
               <thead className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
                 <tr>
                   <th className="text-left font-medium px-4 py-3">Título</th>
+                  <th className="text-left font-medium px-4 py-3">Tipo</th>
                   <th className="text-left font-medium px-4 py-3">Orden</th>
                   <th className="text-left font-medium px-4 py-3">Estado</th>
                   <th className="text-left font-medium px-4 py-3">Fecha</th>
@@ -124,6 +138,9 @@ export default async function InformacionImportantePage({ searchParams }) {
                 {documentos.map((d) => (
                   <tr key={d.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-gray-900 font-medium">{d.titulo}</td>
+                    <td className="px-4 py-3">
+                      <TipoBadge tipo={d.tipo} />
+                    </td>
                     <td className="px-4 py-3 text-gray-700">{d.orden ?? 0}</td>
                     <td className="px-4 py-3">
                       <PublicadoBadge publicado={d.publicado} />

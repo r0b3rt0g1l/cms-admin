@@ -100,13 +100,13 @@ export default function InformacionImportanteForm({
 
       <div>
         <label htmlFor="archivo" className={LABEL_CLASS}>
-          Archivo PDF {editing ? "(opcional)" : <span className="text-red-600">*</span>}
+          Archivo (PDF o imagen) {editing ? "(opcional)" : <span className="text-red-600">*</span>}
         </label>
         <input
           id="archivo"
           name="archivo"
           type="file"
-          accept=".pdf,application/pdf"
+          accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,application/pdf,image/jpeg,image/png,image/gif,image/webp"
           required={!editing}
           className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-guinda file:text-white file:cursor-pointer hover:file:bg-guinda-dark"
         />
@@ -116,7 +116,8 @@ export default function InformacionImportanteForm({
           </p>
         )}
         <p className="text-xs text-gray-500 mt-1">
-          Solo PDF. La miniatura (primera página) se genera automáticamente.
+          PDF o imagen (JPG, PNG, GIF, WebP). El tipo se detecta automáticamente; para
+          PDF se genera la miniatura de la primera página.
         </p>
       </div>
 

@@ -360,9 +360,17 @@ export async function deleteDocumentoTransparenciaAction(formData) {
 const INFO_IMPORTANTE_CATEGORIA = "informacion-importante";
 
 function applyInfoImportante(formData) {
-  // Categoría FIJA (la lee el portal) + tipo PDF; el capturista no la teclea.
+  // Categoría FIJA (la lee el portal); el capturista no la teclea. El tipo se
+  // detecta del archivo subido: "PDF" si es application/pdf, "Imagen" en otro
+  // caso. En edición sin archivo nuevo se omite para que el backend conserve el
+  // tipo existente.
   formData.set("categoria", INFO_IMPORTANTE_CATEGORIA);
-  formData.set("tipo", "PDF");
+  const archivo = formData.get("archivo");
+  if (archivo && archivo.size > 0) {
+    formData.set("tipo", archivo.type === "application/pdf" ? "PDF" : "Imagen");
+  } else {
+    formData.delete("tipo");
+  }
   applyPublicado(formData);
 }
 
@@ -370,7 +378,7 @@ export async function createInformacionImportanteAction(prevState, formData) {
   const titulo = String(formData.get("titulo") || "").trim();
   if (!titulo) return { error: "El título es obligatorio." };
   const archivo = formData.get("archivo");
-  if (!archivo || archivo.size === 0) return { error: "Selecciona un PDF para subir." };
+  if (!archivo || archivo.size === 0) return { error: "Selecciona un archivo (PDF o imagen) para subir." };
 
   applyInfoImportante(formData);
 
