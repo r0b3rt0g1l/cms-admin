@@ -416,3 +416,33 @@ export async function deleteEstadistica(id) {
     method: "DELETE",
   });
 }
+
+// === Contenidos editables (encabezados de página + banners) ===
+
+export async function getContenidos() {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/contenidos`);
+}
+
+export async function getContenido(clave) {
+  const lista = await getContenidos();
+  return Array.isArray(lista)
+    ? lista.find((c) => c.clave === clave) ?? null
+    : null;
+}
+
+export async function upsertContenido(clave, formData) {
+  const slug = await getMunicipioSlug();
+  return apiUpload(
+    `/api/municipios/${slug}/contenidos/${clave}`,
+    formData,
+    "PUT",
+  );
+}
+
+export async function deleteContenido(clave) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/contenidos/${clave}`, {
+    method: "DELETE",
+  });
+}

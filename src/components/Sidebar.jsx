@@ -13,6 +13,7 @@ const NAV = [
   { href: "/", label: "Inicio" },
   { href: "/informacion-importante", label: "Información Importante" },
   { href: "/estadisticas", label: "Estadísticas" },
+  { href: "/contenidos", label: "Contenidos del sitio" },
   {
     label: "Gobierno",
     children: [

@@ -37,6 +37,8 @@ import {
   updateEstadistica,
   replaceEstadisticaIcono,
   deleteEstadistica,
+  upsertContenido,
+  deleteContenido,
 } from "./api";
 
 const TOKEN_COOKIE = "token";
@@ -499,6 +501,39 @@ export async function deleteEstadisticaAction(formData) {
   revalidatePath("/estadisticas");
   revalidatePath("/");
   redirect("/estadisticas?deleted=1");
+}
+
+// === Contenidos editables (encabezados + banners) ===
+
+export async function upsertContenidoAction(clave, prevState, formData) {
+  if (!clave) return { error: "Falta la clave del contenido." };
+  formData.set("activo", formData.get("activo") ? "true" : "false");
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) formData.delete("archivo");
+
+  try {
+    await upsertContenido(clave, formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/contenidos");
+  revalidatePath("/");
+  redirect("/contenidos?updated=1");
+}
+
+export async function deleteContenidoAction(formData) {
+  const clave = String(formData?.get("clave") || "");
+  if (!clave) redirect("/contenidos?deleteError=missing-clave");
+  try {
+    await deleteContenido(clave);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    redirect(`/contenidos?deleteError=${encodeURIComponent(describeError(err))}`);
+  }
+  revalidatePath("/contenidos");
+  revalidatePath("/");
+  redirect("/contenidos?deleted=1");
 }
 
 export async function createSevacTransparenciaAction(prevState, formData) {
