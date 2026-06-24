@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
+import { deleteContenidoAction } from "@/lib/actions";
 
 const INITIAL_STATE = { error: null };
 
@@ -35,6 +36,7 @@ export default function ContenidoEditableForm({
   const esBanner = tipo === "banner";
 
   return (
+    <>
     <form
       action={formAction}
       className="space-y-5 bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
@@ -128,5 +130,33 @@ export default function ContenidoEditableForm({
         <SubmitButton label={submitLabel} />
       </div>
     </form>
+
+    {initialData?.clave && (
+      <form
+        action={deleteContenidoAction}
+        onSubmit={(e) => {
+          if (
+            !window.confirm(
+              "¿Eliminar este contenido? El sitio volverá a su texto por defecto. Esta acción no se puede deshacer.",
+            )
+          ) {
+            e.preventDefault();
+          }
+        }}
+        className="mt-4 flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-3"
+      >
+        <input type="hidden" name="clave" value={initialData.clave} />
+        <span className="text-sm text-red-700">
+          Eliminar este contenido (el sitio volverá al texto por defecto).
+        </span>
+        <button
+          type="submit"
+          className="text-sm font-medium text-red-700 hover:text-red-900 transition-colors"
+        >
+          Eliminar
+        </button>
+      </form>
+    )}
+    </>
   );
 }
