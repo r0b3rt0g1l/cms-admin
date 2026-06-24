@@ -4,7 +4,7 @@ import { deleteInformacionImportanteAction } from "@/lib/actions";
 import DeleteTransparenciaButton from "@/components/transparencia/DeleteTransparenciaButton";
 
 export const metadata = {
-  title: "Información Importante — CMS Municipal",
+  title: "Información Relevante — CMS Municipal",
 };
 
 const FLASH_MESSAGES = {
@@ -59,7 +59,7 @@ export default async function InformacionImportantePage({ searchParams }) {
   let documentos = [];
   let loadError = null;
   try {
-    const data = await getDocumentos({ categoria: "informacion-importante" });
+    const data = await getDocumentos({ categoria: "informacion-relevante" });
     documentos = Array.isArray(data) ? data : [];
   } catch (err) {
     loadError = err?.message || "No se pudieron cargar los documentos.";
@@ -73,7 +73,7 @@ export default async function InformacionImportantePage({ searchParams }) {
             Inicio · Sección destacada
           </p>
           <h1 className="text-2xl font-semibold text-gray-900 mt-1">
-            Información Importante
+            Información Relevante
           </h1>
           <p className="text-sm text-gray-600 mt-1">
             Documentos PDF o imágenes que aparecen en el{" "}

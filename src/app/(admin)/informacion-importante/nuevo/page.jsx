@@ -2,7 +2,7 @@ import InformacionImportanteForm from "@/components/informacion-importante/Infor
 import { createInformacionImportanteAction } from "@/lib/actions";
 
 export const metadata = {
-  title: "Nuevo documento · Información Importante — CMS Municipal",
+  title: "Nuevo documento · Información Relevante — CMS Municipal",
 };
 
 export default function NuevoInformacionImportantePage() {
@@ -10,7 +10,7 @@ export default function NuevoInformacionImportantePage() {
     <div className="max-w-3xl mx-auto">
       <div className="mb-6">
         <p className="text-xs uppercase tracking-wider text-gray-500 font-medium">
-          Inicio · Información Importante
+          Inicio · Información Relevante
         </p>
         <h1 className="text-2xl font-semibold text-gray-900 mt-1">Nuevo documento</h1>
         <p className="text-sm text-gray-600 mt-1">

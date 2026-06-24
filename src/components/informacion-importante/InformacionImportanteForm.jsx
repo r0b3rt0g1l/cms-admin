@@ -23,8 +23,8 @@ function SubmitButton({ label }) {
   );
 }
 
-// Formulario simple para "Información Importante" (carrusel del inicio). La
-// categoría la fija la server action (informacion-importante); aquí solo lo
+// Formulario simple para "Información Relevante" (carrusel del inicio). La
+// categoría la fija la server action (informacion-relevante); aquí solo lo
 // esencial para el capturista.
 export default function InformacionImportanteForm({
   action,

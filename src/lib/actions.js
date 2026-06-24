@@ -362,8 +362,8 @@ export async function deleteDocumentoTransparenciaAction(formData) {
   redirect("/transparencia/lgc-g-ldf?deleted=1");
 }
 
-// === Información Importante (carrusel del inicio) — reusa el endpoint /documentos ===
-const INFO_IMPORTANTE_CATEGORIA = "informacion-importante";
+// === Información Relevante (carrusel del inicio) — reusa el endpoint /documentos ===
+const INFO_IMPORTANTE_CATEGORIA = "informacion-relevante";
 
 function applyInfoImportante(formData) {
   // Categoría FIJA (la lee el portal); el capturista no la teclea. El tipo se
