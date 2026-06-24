@@ -4,11 +4,6 @@
 export const CONTENIDOS = [
   { clave: "header-directorio", label: "Encabezado · Directorio", tipo: "header" },
   { clave: "header-cabildo", label: "Encabezado · Cabildo", tipo: "header" },
-  {
-    clave: "header-informacion-publica",
-    label: "Encabezado · Información Pública",
-    tipo: "header",
-  },
   { clave: "header-leyes", label: "Encabezado · Leyes y Reglamentos", tipo: "header" },
   { clave: "header-sevac", label: "Encabezado · SEvAC", tipo: "header" },
   { clave: "header-contacto", label: "Encabezado · Contacto", tipo: "header" },
