@@ -19,6 +19,7 @@ const NAV = [
     children: [
       { href: "/cabildo", label: "Cabildo" },
       { href: "/directorio", label: "Directorio" },
+      { href: "/plan-municipal", label: "Plan Municipal" },
     ],
   },
   {
@@ -29,6 +30,7 @@ const NAV = [
     ],
   },
   { href: "/imagenes", label: "Galería" },
+  { href: "/turismo", label: "Turismo" },
   {
     label: "Apariencia",
     children: [

@@ -15,6 +15,9 @@ import {
   createDocumento,
   updateDocumento,
   deleteDocumento,
+  createAtractivo,
+  updateAtractivo,
+  deleteAtractivo,
   getHeroSlides,
   createHeroSlide,
   updateHeroSlide,
@@ -288,23 +291,28 @@ function applySevacCoercions(formData) {
 
 // === Información Relevante (carrusel del inicio) — reusa el endpoint /documentos ===
 const INFO_IMPORTANTE_CATEGORIA = "informacion-relevante";
+const PLAN_MUNICIPAL_CATEGORIA = "plan-municipal";
 
-function applyInfoImportante(formData) {
-  // Categoría FIJA (la lee el portal); el capturista no la teclea. El tipo se
-  // detecta del archivo subido: "PDF" si es application/pdf, "Imagen" en otro
-  // caso. En edición sin archivo nuevo se omite para que el backend conserve el
-  // tipo existente.
-  formData.set("categoria", INFO_IMPORTANTE_CATEGORIA);
+// Prepara el FormData de un "bloque" (modelo Documento) para la categoría dada:
+// fija la categoría (la lee el portal; el capturista no la teclea), detecta el tipo
+// del archivo ("PDF" o "Imagen"; en edición sin archivo nuevo se omite para conservar
+// el existente), limpia la portada vacía y normaliza `publicado`. Compartido por
+// Información Relevante y Plan Municipal (mismo modelo, distinta categoría).
+function applyDocumentoBloque(formData, categoria) {
+  formData.set("categoria", categoria);
   const archivo = formData.get("archivo");
   if (archivo && archivo.size > 0) {
     formData.set("tipo", archivo.type === "application/pdf" ? "PDF" : "Imagen");
   } else {
     formData.delete("tipo");
   }
-  // Limpia el input de portada si llegó vacío (size 0) para que el backend no lo procese.
   const portada = formData.get("portada");
   if (!portada || portada.size === 0) formData.delete("portada");
   applyPublicado(formData);
+}
+
+function applyInfoImportante(formData) {
+  applyDocumentoBloque(formData, INFO_IMPORTANTE_CATEGORIA);
 }
 
 export async function createInformacionImportanteAction(prevState, formData) {
@@ -387,6 +395,159 @@ export async function deleteInformacionImportanteAction(formData) {
   revalidatePath("/informacion-importante");
   revalidatePath("/");
   redirect("/informacion-importante?deleted=1");
+}
+
+// === Plan Municipal (modelo Documento, categoría plan-municipal) ===
+export async function createPlanMunicipalAction(prevState, formData) {
+  const titulo = String(formData.get("titulo") || "").trim();
+  if (!titulo) return { error: "El título es obligatorio." };
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0)
+    return { error: "Selecciona una imagen (o PDF) para subir." };
+
+  // Regla: un PDF debe traer imagen de portada (carátula). Para imagen es opcional.
+  const portada = formData.get("portada");
+  if (archivo.type === "application/pdf" && (!portada || portada.size === 0)) {
+    return { error: "Un PDF requiere imagen de portada." };
+  }
+
+  applyDocumentoBloque(formData, PLAN_MUNICIPAL_CATEGORIA);
+
+  try {
+    await createDocumento(formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/plan-municipal");
+  redirect("/plan-municipal?created=1");
+}
+
+export async function updatePlanMunicipalAction(id, prevState, formData) {
+  if (!id) return { error: "Falta el identificador del bloque." };
+  const titulo = String(formData.get("titulo") || "").trim();
+  if (!titulo) return { error: "El título es obligatorio." };
+
+  const archivo = formData.get("archivo");
+  if (!archivo || archivo.size === 0) {
+    formData.delete("archivo");
+  }
+
+  // Regla "PDF requiere portada" sobre el estado RESULTANTE (usa los hidden del form).
+  const portadaNueva = formData.get("portada");
+  const tienePortadaNueva = Boolean(portadaNueva && portadaNueva.size > 0);
+  const quitandoPortada = formData.get("quitarPortada") === "true";
+  const tienePortadaActual =
+    !quitandoPortada && Boolean(formData.get("portadaActualUrl"));
+  const esPdf =
+    archivo && archivo.size > 0
+      ? archivo.type === "application/pdf"
+      : formData.get("tipoActual") === "PDF";
+  if (esPdf && !tienePortadaNueva && !tienePortadaActual) {
+    return { error: "Un PDF requiere imagen de portada." };
+  }
+  formData.delete("tipoActual");
+  formData.delete("portadaActualUrl");
+
+  applyDocumentoBloque(formData, PLAN_MUNICIPAL_CATEGORIA);
+
+  try {
+    await updateDocumento(id, formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/plan-municipal");
+  revalidatePath(`/plan-municipal/${id}/editar`);
+  redirect("/plan-municipal?updated=1");
+}
+
+export async function deletePlanMunicipalAction(formData) {
+  const id = String(formData?.get("id") || "");
+  if (!id) redirect("/plan-municipal?deleteError=missing-id");
+  try {
+    await deleteDocumento(id);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    redirect(
+      `/plan-municipal?deleteError=${encodeURIComponent(describeError(err))}`,
+    );
+  }
+  revalidatePath("/plan-municipal");
+  redirect("/plan-municipal?deleted=1");
+}
+
+// === Atractivos turísticos (modelo Atractivo) ===
+
+// Normaliza el FormData del atractivo antes de enviarlo al backend:
+// - Quita la portada si llegó vacía (input file sin selección).
+// - Reconstruye `galeria` conservando SOLO archivos reales (evita subir un File
+//   vacío cuando el input multiple no tiene selección).
+// - Fuerza `destacado`/`publicado` a "true"/"false" explícitos para que el backend
+//   pueda DESmarcarlos en edición (un checkbox sin marcar no envía nada).
+function normalizeAtractivo(formData) {
+  const portada = formData.get("portada");
+  if (!portada || portada.size === 0) formData.delete("portada");
+
+  const galeria = formData
+    .getAll("galeria")
+    .filter((f) => f && typeof f.size === "number" && f.size > 0);
+  formData.delete("galeria");
+  for (const f of galeria) formData.append("galeria", f);
+
+  formData.set("destacado", formData.get("destacado") ? "true" : "false");
+  formData.set("publicado", formData.get("publicado") ? "true" : "false");
+}
+
+export async function createAtractivoAction(prevState, formData) {
+  const nombre = String(formData.get("nombre") || "").trim();
+  if (!nombre) return { error: "El nombre es obligatorio." };
+  const portada = formData.get("portada");
+  if (!portada || portada.size === 0) {
+    return { error: "Sube una imagen principal (portada) del atractivo." };
+  }
+
+  normalizeAtractivo(formData);
+
+  try {
+    await createAtractivo(formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/turismo");
+  redirect("/turismo?created=1");
+}
+
+export async function updateAtractivoAction(id, prevState, formData) {
+  if (!id) return { error: "Falta el identificador del atractivo." };
+  const nombre = String(formData.get("nombre") || "").trim();
+  if (!nombre) return { error: "El nombre es obligatorio." };
+
+  normalizeAtractivo(formData);
+
+  try {
+    await updateAtractivo(id, formData);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    return { error: describeError(err) };
+  }
+  revalidatePath("/turismo");
+  revalidatePath(`/turismo/${id}/editar`);
+  redirect("/turismo?updated=1");
+}
+
+export async function deleteAtractivoAction(formData) {
+  const id = String(formData?.get("id") || "");
+  if (!id) redirect("/turismo?deleteError=missing-id");
+  try {
+    await deleteAtractivo(id);
+  } catch (err) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
+    redirect(`/turismo?deleteError=${encodeURIComponent(describeError(err))}`);
+  }
+  revalidatePath("/turismo");
+  redirect("/turismo?deleted=1");
 }
 
 // === Estadísticas del home ===

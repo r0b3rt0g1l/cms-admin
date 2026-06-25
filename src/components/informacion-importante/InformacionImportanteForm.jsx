@@ -30,6 +30,10 @@ export default function InformacionImportanteForm({
   action,
   initialData = null,
   submitLabel = "Guardar",
+  cancelHref = "/informacion-importante",
+  ordenHelp = "El número menor aparece primero en el carrusel del inicio.",
+  publicadoLabel = "Publicado (visible en el inicio del sitio)",
+  portadaHelp = "Carátula que se muestra en el carrusel del inicio. Obligatoria para PDF; opcional para imágenes (si no subes una, se usa la imagen como miniatura).",
 }) {
   const router = useRouter();
   const [state, formAction] = useActionState(action, INITIAL_STATE);
@@ -87,9 +91,7 @@ export default function InformacionImportanteForm({
           defaultValue={initialData?.orden ?? 0}
           className={INPUT_CLASS}
         />
-        <p className="text-xs text-gray-500 mt-1">
-          El número menor aparece primero en el carrusel del inicio.
-        </p>
+        <p className="text-xs text-gray-500 mt-1">{ordenHelp}</p>
       </div>
 
       <label className="flex items-center gap-2">
@@ -99,9 +101,7 @@ export default function InformacionImportanteForm({
           defaultChecked={initialData?.publicado ?? true}
           className="h-4 w-4"
         />
-        <span className="text-sm text-gray-700">
-          Publicado (visible en el inicio del sitio)
-        </span>
+        <span className="text-sm text-gray-700">{publicadoLabel}</span>
       </label>
 
       <div>
@@ -180,10 +180,7 @@ export default function InformacionImportanteForm({
             </button>
           </div>
         )}
-        <p className="text-xs text-gray-500 mt-1">
-          Carátula que se muestra en el carrusel del inicio. Obligatoria para PDF;
-          opcional para imágenes (si no subes una, se usa la imagen como miniatura).
-        </p>
+        <p className="text-xs text-gray-500 mt-1">{portadaHelp}</p>
       </div>
 
       {editing && (
@@ -217,7 +214,7 @@ export default function InformacionImportanteForm({
       <div className="flex items-center justify-end gap-3 pt-2">
         <button
           type="button"
-          onClick={() => router.push("/informacion-importante")}
+          onClick={() => router.push(cancelHref)}
           className="px-5 py-2 rounded-md text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
         >
           Cancelar

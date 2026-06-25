@@ -446,3 +446,34 @@ export async function deleteContenido(clave) {
     method: "DELETE",
   });
 }
+
+// === Atractivos turísticos (modelo Atractivo) ===
+export async function getAtractivos() {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/atractivos`);
+}
+
+export async function getAtractivo(id) {
+  const lista = await getAtractivos();
+  const a = Array.isArray(lista)
+    ? lista.find((x) => String(x.id) === String(id))
+    : null;
+  return a ?? null;
+}
+
+export async function createAtractivo(formData) {
+  const slug = await getMunicipioSlug();
+  return apiUpload(`/api/municipios/${slug}/atractivos`, formData);
+}
+
+export async function updateAtractivo(id, formData) {
+  const slug = await getMunicipioSlug();
+  return apiUpload(`/api/municipios/${slug}/atractivos/${id}`, formData, "PATCH");
+}
+
+export async function deleteAtractivo(id) {
+  const slug = await getMunicipioSlug();
+  return apiFetch(`/api/municipios/${slug}/atractivos/${id}`, {
+    method: "DELETE",
+  });
+}
