@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 
@@ -43,6 +43,23 @@ export default function NoticiaForm({ action, initialData = null, submitLabel = 
   // Preview de la imagen: arranca con la actual (al editar) y cambia a la nueva si se elige archivo.
   const [preview, setPreview] = useState(initialData?.imagenUrl ?? null);
   const [fileName, setFileName] = useState("");
+
+  // Fecha de publicación (campo `publicarEn`): es la fecha que se muestra en el portal.
+  // Al editar, arranca con la fecha fijada (publicarEn) o, si no hay, con la de creación (creadoEn).
+  const fechaInicial =
+    (initialData?.publicarEn || initialData?.creadoEn || "").slice(0, 10);
+  // Input NO controlado: `max` (hoy) y el default para noticia nueva se fijan vía ref en hora LOCAL
+  // del navegador, evitando el desfase de zona horaria del SSR (Vercel corre en UTC) y sin setState
+  // dentro del efecto (solo se manipula el DOM, que es el uso recomendado de useEffect).
+  const fechaRef = useRef(null);
+  useEffect(() => {
+    const input = fechaRef.current;
+    if (!input) return;
+    const hoy = new Date();
+    const ymd = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`;
+    input.max = ymd;
+    if (!input.value) input.value = ymd; // Noticia nueva (sin fecha previa): default a hoy.
+  }, []);
 
   function handleFileChange(e) {
     const file = e.target.files?.[0];
@@ -165,6 +182,23 @@ export default function NoticiaForm({ action, initialData = null, submitLabel = 
             Las noticias en <strong>borrador</strong> no se muestran en el sitio público.
           </p>
         </div>
+      </div>
+
+      <div>
+        <label htmlFor="publicarEn" className="block text-sm font-medium text-gray-700 mb-1">
+          Fecha de publicación
+        </label>
+        <input
+          ref={fechaRef}
+          id="publicarEn"
+          name="publicarEn"
+          type="date"
+          defaultValue={fechaInicial}
+          className="w-full md:w-64 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-guinda focus:border-transparent"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Es la fecha que se muestra en el sitio. Puede ser hoy o una fecha pasada (no futura).
+        </p>
       </div>
 
       {state?.error && (

@@ -13,6 +13,20 @@ function describeError(err) {
   return err?.message || "Ocurrió un error al guardar.";
 }
 
+// Valida la fecha de publicación (campo `publicarEn`) antes de llamar al backend: defensa en
+// profundidad sobre el `max=hoy` del input y la guardia autoritativa del backend. Devuelve un
+// mensaje de error o null si es válida (vacía = válida, el backend la guarda como null).
+function validarFechaPublicacion(formData) {
+  const raw = String(formData.get("publicarEn") || "").trim();
+  if (!raw) return null;
+  const fecha = new Date(raw);
+  if (Number.isNaN(fecha.getTime())) return "La fecha de publicación no es válida.";
+  const finDeHoy = new Date();
+  finDeHoy.setHours(23, 59, 59, 999);
+  if (fecha > finDeHoy) return "La fecha de publicación no puede ser futura.";
+  return null;
+}
+
 export async function createNoticiaAction(_prevState, formData) {
   const titulo = String(formData.get("titulo") || "").trim();
   const contenido = String(formData.get("contenido") || "").trim();
@@ -25,6 +39,9 @@ export async function createNoticiaAction(_prevState, formData) {
   if (!archivo || archivo.size === 0) {
     return { error: "La imagen es obligatoria al crear la noticia." };
   }
+
+  const errorFecha = validarFechaPublicacion(formData);
+  if (errorFecha) return { error: errorFecha };
 
   try {
     await createNoticia(formData);
@@ -53,6 +70,9 @@ export async function updateNoticiaAction(_prevState, formData) {
   if (!archivo || archivo.size === 0) {
     formData.delete("archivo");
   }
+
+  const errorFecha = validarFechaPublicacion(formData);
+  if (errorFecha) return { error: errorFecha };
 
   try {
     await updateNoticia(id, formData);
