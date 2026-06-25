@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 
@@ -34,6 +34,12 @@ export default function InformacionImportanteForm({
   const router = useRouter();
   const [state, formAction] = useActionState(action, INITIAL_STATE);
   const editing = Boolean(initialData?.id);
+  // Regla: si el archivo principal es PDF, la portada es obligatoria.
+  const [archivoEsPdf, setArchivoEsPdf] = useState(initialData?.tipo === "PDF");
+  // "Quitar portada" en edición: marca para borrar la portada actual al guardar.
+  const [quitarPortada, setQuitarPortada] = useState(false);
+  // Portada que SIGUE en efecto: existe en el doc y no se ha marcado para quitar.
+  const portadaConservada = Boolean(initialData?.portadaUrl) && !quitarPortada;
 
   return (
     <form
@@ -108,6 +114,7 @@ export default function InformacionImportanteForm({
           type="file"
           accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,application/pdf,image/jpeg,image/png,image/gif,image/webp"
           required={!editing}
+          onChange={(e) => setArchivoEsPdf(e.target.files?.[0]?.type === "application/pdf")}
           className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-guinda file:text-white file:cursor-pointer hover:file:bg-guinda-dark"
         />
         {editing && initialData?.fileName && (
@@ -116,10 +123,90 @@ export default function InformacionImportanteForm({
           </p>
         )}
         <p className="text-xs text-gray-500 mt-1">
-          PDF o imagen (JPG, PNG, GIF, WebP). El tipo se detecta automáticamente; para
-          PDF se genera la miniatura de la primera página.
+          PDF o imagen (JPG, PNG, GIF, WebP). El tipo se detecta automáticamente.
+          Si es PDF, abajo debes subir una imagen de portada.
         </p>
       </div>
+
+      <div>
+        <label htmlFor="portada" className={LABEL_CLASS}>
+          Imagen de portada{" "}
+          {archivoEsPdf && !portadaConservada ? (
+            <span className="text-red-600">* (obligatoria para PDF)</span>
+          ) : (
+            <span className="text-gray-400">(opcional)</span>
+          )}
+        </label>
+        <input
+          id="portada"
+          name="portada"
+          type="file"
+          accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp"
+          required={archivoEsPdf && !portadaConservada}
+          className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-guinda file:text-white file:cursor-pointer hover:file:bg-guinda-dark"
+        />
+        {editing && initialData?.portadaUrl && !quitarPortada && (
+          <div className="mt-2 flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={initialData.portadaUrl}
+              alt="Portada actual"
+              className="h-16 w-16 rounded-md border border-gray-200 object-cover"
+            />
+            <span className="text-xs text-gray-500">
+              Portada actual. Deja vacío para mantenerla.
+            </span>
+            <button
+              type="button"
+              onClick={() => setQuitarPortada(true)}
+              className="text-xs font-medium text-red-700 hover:underline"
+            >
+              Quitar portada
+            </button>
+          </div>
+        )}
+        {editing && initialData?.portadaUrl && quitarPortada && (
+          <div className="mt-2 flex items-center gap-3">
+            <span className="text-xs text-red-700">
+              La portada se quitará al guardar.
+              {archivoEsPdf && " Como es PDF, debes subir una nueva."}
+            </span>
+            <button
+              type="button"
+              onClick={() => setQuitarPortada(false)}
+              className="text-xs font-medium text-gray-600 hover:underline"
+            >
+              Deshacer
+            </button>
+          </div>
+        )}
+        <p className="text-xs text-gray-500 mt-1">
+          Carátula que se muestra en el carrusel del inicio. Obligatoria para PDF;
+          opcional para imágenes (si no subes una, se usa la imagen como miniatura).
+        </p>
+      </div>
+
+      {editing && (
+        <>
+          <input
+            type="hidden"
+            name="tipoActual"
+            value={initialData?.tipo ?? ""}
+            readOnly
+          />
+          <input
+            type="hidden"
+            name="portadaActualUrl"
+            value={initialData?.portadaUrl ?? ""}
+            readOnly
+          />
+          {/* Solo se envía cuando realmente se quita (valor estático y fiable).
+              Si no se quita, el campo no viaja → el backend lo trata como false. */}
+          {quitarPortada && (
+            <input type="hidden" name="quitarPortada" value="true" />
+          )}
+        </>
+      )}
 
       {state?.error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">

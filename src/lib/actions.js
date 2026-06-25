@@ -377,6 +377,9 @@ function applyInfoImportante(formData) {
   } else {
     formData.delete("tipo");
   }
+  // Limpia el input de portada si llegó vacío (size 0) para que el backend no lo procese.
+  const portada = formData.get("portada");
+  if (!portada || portada.size === 0) formData.delete("portada");
   applyPublicado(formData);
 }
 
@@ -385,6 +388,12 @@ export async function createInformacionImportanteAction(prevState, formData) {
   if (!titulo) return { error: "El título es obligatorio." };
   const archivo = formData.get("archivo");
   if (!archivo || archivo.size === 0) return { error: "Selecciona un archivo (PDF o imagen) para subir." };
+
+  // Regla: un PDF debe traer imagen de portada (carátula). Para imagen es opcional.
+  const portada = formData.get("portada");
+  if (archivo.type === "application/pdf" && (!portada || portada.size === 0)) {
+    return { error: "Un PDF requiere imagen de portada." };
+  }
 
   applyInfoImportante(formData);
 
@@ -408,6 +417,24 @@ export async function updateInformacionImportanteAction(id, prevState, formData)
   if (!archivo || archivo.size === 0) {
     formData.delete("archivo");
   }
+
+  // Regla "PDF requiere portada" sobre el estado RESULTANTE (usa los hidden del form
+  // para conocer el tipo, la portada actual y si se está quitando).
+  const portadaNueva = formData.get("portada");
+  const tienePortadaNueva = Boolean(portadaNueva && portadaNueva.size > 0);
+  const quitandoPortada = formData.get("quitarPortada") === "true";
+  const tienePortadaActual =
+    !quitandoPortada && Boolean(formData.get("portadaActualUrl"));
+  const esPdf =
+    archivo && archivo.size > 0
+      ? archivo.type === "application/pdf"
+      : formData.get("tipoActual") === "PDF";
+  if (esPdf && !tienePortadaNueva && !tienePortadaActual) {
+    return { error: "Un PDF requiere imagen de portada." };
+  }
+  formData.delete("tipoActual");
+  formData.delete("portadaActualUrl");
+  // `quitarPortada` NO se borra: lo lee el backend para eliminar la portada en Cloudinary.
 
   applyInfoImportante(formData);
 
