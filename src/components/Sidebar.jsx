@@ -38,7 +38,6 @@ const NAV = [
   {
     label: "Transparencia",
     children: [
-      { href: "/transparencia/lgc-g-ldf", label: "LGC.G / LDF" },
       { href: "/transparencia/sevac", label: "SEvAC" },
     ],
   },

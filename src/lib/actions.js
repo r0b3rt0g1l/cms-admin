@@ -280,86 +280,10 @@ function applyPublicado(formData) {
   formData.set("publicado", formData.get("publicado") ? "true" : "false");
 }
 
-function applyDocumentoCoercions(formData) {
-  const trimestre = formData.get("trimestre");
-  if (trimestre === null || trimestre === "") {
-    formData.delete("trimestre");
-  } else {
-    const n = parseInt(trimestre, 10);
-    if (Number.isFinite(n)) formData.set("trimestre", String(n));
-  }
-  const anio = formData.get("anio");
-  if (anio === null || anio === "") {
-    formData.delete("anio");
-  } else {
-    const n = parseInt(anio, 10);
-    if (Number.isFinite(n)) formData.set("anio", String(n));
-  }
-  const ambito = formData.get("ambito");
-  if (ambito === null || ambito === "") formData.delete("ambito");
-  applyPublicado(formData);
-}
-
 function applySevacCoercions(formData) {
   if (formData.get("trimestre") === "") formData.delete("trimestre");
   if (formData.get("anio") === "") formData.delete("anio");
   applyPublicado(formData);
-}
-
-export async function createDocumentoTransparenciaAction(prevState, formData) {
-  const titulo = String(formData.get("titulo") || "").trim();
-  if (!titulo) return { error: "El título es obligatorio." };
-  const archivo = formData.get("archivo");
-  if (!archivo || archivo.size === 0) return { error: "Selecciona un PDF para subir." };
-
-  applyDocumentoCoercions(formData);
-
-  try {
-    await createDocumento(formData);
-  } catch (err) {
-    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    return { error: describeError(err) };
-  }
-  revalidatePath("/transparencia/lgc-g-ldf");
-  revalidatePath("/");
-  redirect("/transparencia/lgc-g-ldf?created=1");
-}
-
-export async function updateDocumentoTransparenciaAction(id, prevState, formData) {
-  if (!id) return { error: "Falta el identificador del documento." };
-  const titulo = String(formData.get("titulo") || "").trim();
-  if (!titulo) return { error: "El título es obligatorio." };
-
-  const archivo = formData.get("archivo");
-  if (!archivo || archivo.size === 0) {
-    formData.delete("archivo");
-  }
-
-  applyDocumentoCoercions(formData);
-
-  try {
-    await updateDocumento(id, formData);
-  } catch (err) {
-    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    return { error: describeError(err) };
-  }
-  revalidatePath("/transparencia/lgc-g-ldf");
-  revalidatePath(`/transparencia/lgc-g-ldf/${id}/editar`);
-  redirect("/transparencia/lgc-g-ldf?updated=1");
-}
-
-export async function deleteDocumentoTransparenciaAction(formData) {
-  const id = String(formData?.get("id") || "");
-  if (!id) redirect("/transparencia/lgc-g-ldf?deleteError=missing-id");
-  try {
-    await deleteDocumento(id);
-  } catch (err) {
-    if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    redirect(`/transparencia/lgc-g-ldf?deleteError=${encodeURIComponent(describeError(err))}`);
-  }
-  revalidatePath("/transparencia/lgc-g-ldf");
-  revalidatePath("/");
-  redirect("/transparencia/lgc-g-ldf?deleted=1");
 }
 
 // === Información Relevante (carrusel del inicio) — reusa el endpoint /documentos ===
