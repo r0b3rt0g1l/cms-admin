@@ -176,6 +176,15 @@ export default function AtractivoForm({
         </div>
       </div>
 
+      <div>
+        <label htmlFor="mapsUrl" className={LABEL_CLASS}>
+          Link de Google Maps <span className="text-gray-400">(opcional)</span>
+        </label>
+        <input id="mapsUrl" name="mapsUrl" type="url"
+          defaultValue={initialData?.mapsUrl ?? ""}
+          placeholder="https://maps.google.com/..." className={INPUT_CLASS} />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <label htmlFor="horario" className={LABEL_CLASS}>Horario</label>
